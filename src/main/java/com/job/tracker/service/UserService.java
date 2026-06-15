@@ -20,7 +20,9 @@ public class UserService {
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
+    // ================= SIGNUP =================
     public AuthDTO.AuthResponse signup(AuthDTO.SignUpRequest request) {
+
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email already exists");
         }
@@ -43,14 +45,20 @@ public class UserService {
                 user.getFirstName(),
                 user.getLastName(),
                 token,
-                "Bearer"
+                "Bearer",
+                null,                    // refreshToken (if not implemented yet)
+                user.getEmail(),        // username (or change if you have username field)
+                "USER"                  // role (default)
         );
     }
 
+    // ================= LOGIN =================
     public AuthDTO.AuthResponse login(AuthDTO.LoginRequest request) {
+
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        // FIXED PASSWORD CHECK
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new RuntimeException("Invalid password");
         }
@@ -63,11 +71,16 @@ public class UserService {
                 user.getFirstName(),
                 user.getLastName(),
                 token,
-                "Bearer"
+                "Bearer",
+                null,
+                user.getEmail(),
+                "USER"
         );
     }
 
+    // ================= PROFILE =================
     public AuthDTO.UserProfile getUserProfile(Long userId) {
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 

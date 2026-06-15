@@ -1,119 +1,138 @@
 package com.job.tracker.service;
 
+import com.job.tracker.dto.AuthDTO;
 import com.job.tracker.dto.JobDTO;
+import com.job.tracker.dto.JobDTO.CreateJobRequest;
+import com.job.tracker.dto.JobDTO.JobListResponse;
+import com.job.tracker.dto.JobDTO.JobResponse;
+import com.job.tracker.dto.JobDTO.UpdateJobRequest;
 import com.job.tracker.entity.Job;
 import com.job.tracker.entity.User;
-import com.job.tracker.repository.JobRepository;
 import com.job.tracker.repository.UserRepository;
+import com.job.tracker.security.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class JobService {
 
     @Autowired
-    private JobRepository jobRepository;
-
-    @Autowired
     private UserRepository userRepository;
 
-    private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-    public JobDTO.JobResponse createJob(Long userId, JobDTO.CreateJobRequest request) {
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
+
+    // ================= SIGNUP =================
+    public AuthDTO.AuthResponse signup(AuthDTO.SignUpRequest request) {
+
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Email already exists");
+        }
+
+        User user = new User();
+        user.setEmail(request.getEmail());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+        user.setTargetRoles(request.getTargetRoles());
+        user.setTargetLocations(request.getTargetLocations());
+
+        user = userRepository.save(user);
+
+        String token = jwtTokenProvider.generateToken(user.getId(), user.getEmail());
+
+        return new AuthDTO.AuthResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName(),
+                token,
+                "Bearer",
+                null,
+                user.getEmail(),
+                "USER"
+        );
+    }
+
+    // ================= LOGIN =================
+    public AuthDTO.AuthResponse login(AuthDTO.LoginRequest request) {
+
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new RuntimeException("Invalid password");
+        }
+
+        String token = jwtTokenProvider.generateToken(user.getId(), user.getEmail());
+
+        return new AuthDTO.AuthResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName(),
+                token,
+                "Bearer",
+                null,
+                user.getEmail(),
+                "USER"
+        );
+    }
+
+    // ================= PROFILE =================
+    public AuthDTO.UserProfile getUserProfile(Long userId) {
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        Job job = new Job();
-        job.setUser(user);
-        job.setCompany(request.getCompany());
-        job.setRoleName(request.getRoleName());
-        job.setJobUrl(request.getJobUrl());
-        job.setJobDescription(request.getJobDescription());
-        job.setJobType(Job.JobType.valueOf(request.getJobType()));
-        job.setLocation(request.getLocation());
-        job.setSalary(request.getSalary());
-        job.setCompanySize(request.getCompanySize());
-        job.setPostedDate(request.getPostedDate());
-        job.setDeadline(request.getDeadline());
-        job.setStatus(Job.ApplicationStatus.valueOf(request.getStatus()));
-        job.setNotes(request.getNotes());
-
-        job = jobRepository.save(job);
-        return convertToResponse(job);
-    }
-
-    public JobDTO.JobResponse getJob(Long jobId, Long userId) {
-        Job job = jobRepository.findByIdAndUserId(jobId, userId)
-                .orElseThrow(() -> new RuntimeException("Job not found or unauthorized"));
-        return convertToResponse(job);
-    }
-
-    public JobDTO.JobListResponse getAllJobs(Long userId, String status) {
-        List<Job> jobs;
-        if (status != null && !status.isEmpty()) {
-            jobs = jobRepository.findByUserIdAndStatus(userId, Job.ApplicationStatus.valueOf(status));
-        } else {
-            jobs = jobRepository.findByUserIdOrderByCreatedAtDesc(userId);
-        }
-
-        List<JobDTO.JobResponse> responses = jobs.stream()
-                .map(this::convertToResponse)
-                .collect(Collectors.toList());
-
-        return new JobDTO.JobListResponse(responses, responses.size());
-    }
-
-    public JobDTO.JobResponse updateJob(Long jobId, Long userId, JobDTO.UpdateJobRequest request) {
-        Job job = jobRepository.findByIdAndUserId(jobId, userId)
-                .orElseThrow(() -> new RuntimeException("Job not found or unauthorized"));
-
-        if (request.getCompany() != null) job.setCompany(request.getCompany());
-        if (request.getRoleName() != null) job.setRoleName(request.getRoleName());
-        if (request.getJobUrl() != null) job.setJobUrl(request.getJobUrl());
-        if (request.getJobDescription() != null) job.setJobDescription(request.getJobDescription());
-        if (request.getJobType() != null) job.setJobType(Job.JobType.valueOf(request.getJobType()));
-        if (request.getLocation() != null) job.setLocation(request.getLocation());
-        if (request.getSalary() != null) job.setSalary(request.getSalary());
-        if (request.getCompanySize() != null) job.setCompanySize(request.getCompanySize());
-        if (request.getDeadline() != null) job.setDeadline(request.getDeadline());
-        if (request.getStatus() != null) job.setStatus(Job.ApplicationStatus.valueOf(request.getStatus()));
-        if (request.getNotes() != null) job.setNotes(request.getNotes());
-
-        job = jobRepository.save(job);
-        return convertToResponse(job);
-    }
-
-    public void deleteJob(Long jobId, Long userId) {
-        Job job = jobRepository.findByIdAndUserId(jobId, userId)
-                .orElseThrow(() -> new RuntimeException("Job not found or unauthorized"));
-        jobRepository.delete(job);
-    }
-
-    public long getJobCount(Long userId) {
-        return jobRepository.countByUserId(userId);
-    }
-
-    private JobDTO.JobResponse convertToResponse(Job job) {
-        return new JobDTO.JobResponse(
-                job.getId(),
-                job.getCompany(),
-                job.getRoleName(),
-                job.getJobUrl(),
-                job.getJobDescription(),
-                job.getJobType() != null ? job.getJobType().toString() : null,
-                job.getLocation(),
-                job.getSalary(),
-                job.getCompanySize(),
-                job.getPostedDate(),
-                job.getDeadline(),
-                job.getStatus() != null ? job.getStatus().toString() : null,
-                job.getNotes(),
-                job.getCreatedAt() != null ? job.getCreatedAt().format(dateFormatter) : null,
-                job.getUpdatedAt() != null ? job.getUpdatedAt().format(dateFormatter) : null
+        return new AuthDTO.UserProfile(
+                user.getId(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getTargetRoles(),
+                user.getTargetLocations()
         );
     }
+
+    public JobResponse createJob(Long userId, CreateJobRequest request) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'createJob'");
+    }
+
+    public JobListResponse getAllJobs(Long userId, String status) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getAllJobs'");
+    }
+
+     public JobListResponse getJobs(Long userId, String status) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getAllJobs'");
+    }
+
+     public JobResponse updateJob(Long id, Long userId, UpdateJobRequest request) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'updateJob'");
+     }
+
+     public void deleteJob(Long id, Long userId) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'deleteJob'");
+     }
+
+     public long getJobCount(Long userId) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getJobCount'");
+     }
+
+     public JobResponse getJob(Long id, Long userId) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getJob'");
+     }
+
+    
 }

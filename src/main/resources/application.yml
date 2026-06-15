@@ -23,7 +23,7 @@ server:
     context-path: /api
 
 jwt:
-  secret: mySuperSecretKeyForJwtAuthentication123456789
+  secret: 1234567890123456789012345678901234567890123456789012345678901234
   expiration: 86400000
 
 logging:

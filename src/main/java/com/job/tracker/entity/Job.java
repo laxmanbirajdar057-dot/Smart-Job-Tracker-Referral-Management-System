@@ -69,9 +69,9 @@ public class Job {
         updatedAt = LocalDateTime.now();
     }
 
-    public void setUser(User user) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+    // public void setUser(User user) {
+    //     throw new UnsupportedOperationException("Not supported yet.");
+    // }
 
     public enum JobType {
         FULL_TIME, PART_TIME, CONTRACT, INTERNSHIP, TEMPORARY
