@@ -1,6 +1,5 @@
 package com.job.tracker.controller;
 
-
 import com.job.tracker.dto.AuthDTO;
 import com.job.tracker.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,11 +9,14 @@ import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/auth")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173"})
+@CrossOrigin(origins = { "http://localhost:3000", "http://localhost:5173" })
+
 public class AuthController {
 
     @Autowired
     private UserService userService;
+
+    
 
     @PostMapping("/signup")
     public ResponseEntity<AuthDTO.AuthResponse> signup(@RequestBody AuthDTO.SignUpRequest request) {

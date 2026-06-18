@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign Up - Job Tracker</title>
+  <link rel="stylesheet" href="/api/css/style.css" />
+</head>
+<body>
+
+  <div class="auth-wrapper">
+    <div class="auth-card">
+      <div class="auth-brand">
+        <span class="dot"></span>
+        <span>Job Tracker</span>
+      </div>
+
+      <h1>Create your account</h1>
+      <p class="subtitle">Start tracking applications and referrals in one place.</p>
+
+      <div id="errorBanner" class="error-banner"></div>
+
+      <form id="signupForm">
+        <div class="field-row">
+          <div class="field">
+            <label for="firstName">First name</label>
+            <input type="text" id="firstName" placeholder="Laxman" required autocomplete="given-name" />
+          </div>
+          <div class="field">
+            <label for="lastName">Last name</label>
+            <input type="text" id="lastName" placeholder="Birajdar" required autocomplete="family-name" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="you@example.com" required autocomplete="email" />
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="At least 6 characters" required autocomplete="new-password" />
+        </div>
+
+        <div class="field">
+          <label for="targetRoles">Target roles (optional)</label>
+          <input type="text" id="targetRoles" placeholder="Java Backend Developer, SDE" />
+        </div>
+
+        <div class="field">
+          <label for="targetLocations">Target locations (optional)</label>
+          <input type="text" id="targetLocations" placeholder="Mumbai, Pune, Remote" />
+        </div>
+
+        <button type="submit" id="submitBtn" class="btn btn-primary">Create Account</button>
+      </form>
+
+      <div class="auth-footer">
+        Already have an account? <a href="/api/login-page">Log in</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="/api/js/common.js"></script>
+  <script src="/api/js/auth.js"></script>
+</body>
+</html>

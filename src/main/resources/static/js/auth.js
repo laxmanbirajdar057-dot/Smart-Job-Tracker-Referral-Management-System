@@ -1,33 +1,110 @@
+// Handles both the login page and the signup page.
+// Which form is present on the page determines which handler attaches.
 
-console.log("auth.js loaded");
+document.addEventListener("DOMContentLoaded", () => {
+  // If already logged in, skip straight to the dashboard.
+  if (Auth.isLoggedIn()) {
+    window.location.href = "/api/dashboard";
+    return;
+  }
 
-async function login() {
+  const loginForm = document.getElementById("loginForm");
+  if (loginForm) {
+    loginForm.addEventListener("submit", handleLogin);
+  }
 
-    console.log("Login button clicked");
+  const signupForm = document.getElementById("signupForm");
+  if (signupForm) {
+    signupForm.addEventListener("submit", handleSignup);
+  }
+});
 
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
+async function handleLogin(event) {
+  event.preventDefault();
+  hideError("errorBanner");
 
-    console.log(email);
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const submitBtn = document.getElementById("submitBtn");
 
-    const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            email,
-            password
-        })
+  if (!email || !password) {
+    showError("errorBanner", "Please enter both email and password.");
+    return;
+  }
+
+  setButtonLoading(submitBtn, true, "Logging in...");
+
+  try {
+    const data = await apiFetch("/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
     });
 
-    console.log("Status:", response.status);
+    Auth.setToken(data.token);
+    Auth.setUser({
+      id: data.id,
+      email: data.email,
+      firstName: data.firstName,
+      lastName: data.lastName,
+    });
 
-    const data = await response.json();
+    window.location.href = "/api/dashboard";
+  } catch (err) {
+    showError("errorBanner", err.message || "Login failed. Check your credentials.");
+  } finally {
+    setButtonLoading(submitBtn, false);
+  }
+}
 
-    console.log(data);
+async function handleSignup(event) {
+  event.preventDefault();
+  hideError("errorBanner");
 
-    localStorage.setItem("token", data.token);
+  const firstName = document.getElementById("firstName").value.trim();
+  const lastName = document.getElementById("lastName").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const targetRoles = document.getElementById("targetRoles").value.trim();
+  const targetLocations = document.getElementById("targetLocations").value.trim();
+  const submitBtn = document.getElementById("submitBtn");
 
-    alert("Login Success");
+  if (!firstName || !lastName || !email || !password) {
+    showError("errorBanner", "First name, last name, email, and password are required.");
+    return;
+  }
+
+  if (password.length < 6) {
+    showError("errorBanner", "Password should be at least 6 characters.");
+    return;
+  }
+
+  setButtonLoading(submitBtn, true, "Creating account...");
+
+  try {
+    const data = await apiFetch("/auth/signup", {
+      method: "POST",
+      body: JSON.stringify({
+        email,
+        password,
+        firstName,
+        lastName,
+        targetRoles: targetRoles || null,
+        targetLocations: targetLocations || null,
+      }),
+    });
+
+    Auth.setToken(data.token);
+    Auth.setUser({
+      id: data.id,
+      email: data.email,
+      firstName: data.firstName,
+      lastName: data.lastName,
+    });
+
+    window.location.href = "/api/dashboard";
+  } catch (err) {
+    showError("errorBanner", err.message || "Signup failed. Please try again.");
+  } finally {
+    setButtonLoading(submitBtn, false);
+  }
 }

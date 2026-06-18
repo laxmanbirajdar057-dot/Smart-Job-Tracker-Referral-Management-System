@@ -1,34 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Job Tracker</title>
+  <link rel="stylesheet" href="/api/css/style.css">
 </head>
-
 <body>
-   <h2>Login</h2>
 
-<input
-    type="email"
-    id="email"
-    placeholder="Enter Email">
+<div class="auth-wrapper">
+  <div class="auth-card">
 
-<br><br>
+    <div class="auth-brand">
+      <span class="dot"></span>
+      <span>Job Tracker</span>
+    </div>
 
-<input
-    type="password"
-    id="password"
-    placeholder="Enter Password">
+    <h1>Welcome Back</h1>
+    <p class="subtitle">
+      Login to continue tracking your applications.
+    </p>
 
-<br><br>
+    <div id="errorBanner" class="error-banner"></div>
 
-<button onclick="login()">
-    Login
-</button>
+    <form id="loginForm">
 
+      <div class="field">
+        <label>Email</label>
+        <input
+          type="email"
+          id="email"
+          placeholder="you@example.com"
+          required>
+      </div>
+
+      <div class="field">
+        <label>Password</label>
+        <input
+          type="password"
+          id="password"
+          placeholder="Enter your password"
+          required>
+      </div>
+
+      <button
+        type="submit"
+        id="submitBtn"
+        class="btn btn-primary">
+        Login
+      </button>
+
+    </form>
+
+    <div class="auth-footer">
+      Don't have an account?
+      <a href="/api/signup-page">Create Account</a>
+    </div>
+
+  </div>
+</div>
+
+<script src="/api/js/common.js"></script>
 <script src="/api/js/auth.js"></script>
-</body>
 
+</body>
 </html>

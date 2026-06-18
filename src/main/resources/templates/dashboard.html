@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard - Job Tracker</title>
+  <link rel="stylesheet" href="/api/css/style.css" />
+</head>
+<body>
+
+  <div class="app-shell" style="flex-direction: column;">
+    <header class="topbar">
+      <div class="brand">
+        <span class="dot"></span>
+        <span>Job Tracker</span>
+      </div>
+      <div class="user-info">
+        <span id="userName">—</span>
+        <button id="logoutBtn" class="btn btn-secondary btn-sm">Log out</button>
+      </div>
+    </header>
+
+    <main class="main-content">
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-value" id="totalCount">0</div>
+          <div class="stat-label">Total Saved</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="appliedCount">0</div>
+          <div class="stat-label">Applied / In Progress</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="offerCount">0</div>
+          <div class="stat-label">Offers</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="rejectedCount">0</div>
+          <div class="stat-label">Rejected</div>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <h2>Your Applications</h2>
+        <div class="filter-row">
+          <select id="statusFilter">
+            <option value="">All statuses</option>
+            <option value="SAVED">Saved</option>
+            <option value="APPLIED">Applied</option>
+            <option value="SCREENING">Screening</option>
+            <option value="TECHNICAL_ROUND">Technical Round</option>
+            <option value="HR_ROUND">HR Round</option>
+            <option value="OFFER">Offer</option>
+            <option value="NEGOTIATING">Negotiating</option>
+            <option value="REJECTED">Rejected</option>
+          </select>
+          <button id="addJobBtn" class="btn btn-primary" style="width: auto;">+ Add Job</button>
+        </div>
+      </div>
+
+      <div id="jobList" class="job-grid"></div>
+
+    </main>
+  </div>
+
+  <!-- Add / Edit Job Modal -->
+  <div id="modalOverlay" class="modal-overlay">
+    <div class="modal">
+      <h2 id="modalTitle">Add Job</h2>
+
+      <form id="jobForm">
+        <div class="field-row">
+          <div class="field">
+            <label for="company">Company *</label>
+            <input type="text" id="company" placeholder="e.g. Fusion Practices" required />
+          </div>
+          <div class="field">
+            <label for="roleName">Role *</label>
+            <input type="text" id="roleName" placeholder="e.g. Java Backend Developer" required />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="jobUrl">Job URL</label>
+          <input type="url" id="jobUrl" placeholder="https://..." />
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="location">Location</label>
+            <input type="text" id="location" placeholder="Mumbai / Remote" />
+          </div>
+          <div class="field">
+            <label for="salary">Salary</label>
+            <input type="text" id="salary" placeholder="e.g. 6-8 LPA" />
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="companySize">Company size</label>
+            <input type="text" id="companySize" placeholder="e.g. 50-200" />
+          </div>
+          <div class="field">
+            <label for="deadline">Deadline</label>
+            <input type="date" id="deadline" />
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="jobType">Job type</label>
+            <select id="jobType"></select>
+          </div>
+          <div class="field">
+            <label for="status">Status</label>
+            <select id="status"></select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="jobDescription">Job description</label>
+          <textarea id="jobDescription" placeholder="Paste relevant parts of the JD..."></textarea>
+        </div>
+
+        <div class="field">
+          <label for="notes">Notes</label>
+          <textarea id="notes" placeholder="Referral contact, interview notes, follow-ups..."></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" id="cancelBtn" class="btn btn-secondary">Cancel</button>
+          <button type="submit" id="saveBtn" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script src="/api/js/common.js"></script>
+  <script src="/api/js/jobs.js"></script>
+</body>
+</html>
