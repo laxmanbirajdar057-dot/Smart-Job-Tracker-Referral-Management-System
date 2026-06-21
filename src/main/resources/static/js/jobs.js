@@ -105,7 +105,7 @@ function applyFilter() {
 
 function renderJobs(jobs) {
   const container = document.getElementById("jobList");
-// console.log(job);
+
   if (jobs.length === 0) {
     container.innerHTML = `
       <div class="empty-state">

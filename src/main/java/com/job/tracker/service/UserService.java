@@ -1,12 +1,13 @@
 package com.job.tracker.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
 import com.job.tracker.dto.AuthDTO;
 import com.job.tracker.entity.User;
 import com.job.tracker.repository.UserRepository;
 import com.job.tracker.security.JwtTokenProvider;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
 
 @Service
 public class UserService {

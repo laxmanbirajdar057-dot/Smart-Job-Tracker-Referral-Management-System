@@ -1,22 +1,22 @@
 package com.job.tracker.service;
 
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.job.tracker.dto.JobDTO.CreateJobRequest;
 import com.job.tracker.dto.JobDTO.JobListResponse;
 import com.job.tracker.dto.JobDTO.JobResponse;
 import com.job.tracker.dto.JobDTO.UpdateJobRequest;
 import com.job.tracker.entity.Job;
-import com.job.tracker.entity.Job.JobType;
 import com.job.tracker.entity.Referral;
 import com.job.tracker.entity.User;
 import com.job.tracker.repository.JobRepository;
 import com.job.tracker.repository.ReferralRepository;
 import com.job.tracker.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class JobService {

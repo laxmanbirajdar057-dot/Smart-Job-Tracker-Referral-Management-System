@@ -18,7 +18,13 @@ public class JobDTO {
         private LocalDate deadline;
         private String status;
         private String notes;
-        private Long referralId;
+        private Boolean hasReferral;
+        private String referrerName;
+        private String referrerContact;
+        private String referrerRelation;
+        private String referralStatus;
+        private LocalDate referralRequestedDate;
+        private String referralNotes;
 
         public CreateJobRequest() {
         }
@@ -136,12 +142,65 @@ public class JobDTO {
             this.notes = notes;
         }
 
-        public Long getReferralId() {
-            return referralId;
+        public Boolean getHasReferral() {
+            return hasReferral;
         }
 
-        public void setReferralId(Long referralId) {
-            this.referralId = referralId;
+        public void setHasReferral(Boolean hasReferral) {
+            this.hasReferral = hasReferral;
+        }
+
+        public String getReferrerName() {
+            return referrerName;
+        }
+
+        public void setReferrerName(String referrerName) {
+            this.referrerName = referrerName;
+        }
+
+        public String getReferrerContact() {
+            return referrerContact;
+        }
+
+        public void setReferrerContact(String referrerContact) {
+            this.referrerContact = referrerContact;
+        }
+
+        public String getReferrerRelation() {
+            return referrerRelation;
+        }
+
+        public void setReferrerRelation(String referrerRelation) {
+            this.referrerRelation = referrerRelation;
+        }
+
+        public String getReferralStatus() {
+            return referralStatus;
+        }
+
+        public void setReferralStatus(String referralStatus) {
+            this.referralStatus = referralStatus;
+        }
+
+        public LocalDate getReferralRequestedDate() {
+            return referralRequestedDate;
+        }
+
+        public void setReferralRequestedDate(LocalDate referralRequestedDate) {
+            this.referralRequestedDate = referralRequestedDate;
+        }
+
+        public String getReferralNotes() {
+            return referralNotes;
+        }
+
+        public void setReferralNotes(String referralNotes) {
+            this.referralNotes = referralNotes;
+        }
+
+        public Long getReferralId() {
+            // TODO Auto-generated method stub
+            throw new UnsupportedOperationException("Unimplemented method 'getReferralId'");
         }
     }
 
@@ -157,8 +216,13 @@ public class JobDTO {
         private LocalDate deadline;
         private String status;
         private String notes;
-        private Long referralId;
-        private boolean referralIdSet = false;
+        private Boolean hasReferral;
+        private String referrerName;
+        private String referrerContact;
+        private String referrerRelation;
+        private String referralStatus;
+        private LocalDate referralRequestedDate;
+        private String referralNotes;
 
         public UpdateJobRequest() {
         }
@@ -267,37 +331,6 @@ public class JobDTO {
             this.notes = notes;
         }
 
-        public Long getReferralId() {
-            return referralId;
-        }
-
-        public void setReferralId(Long referralId) {
-            this.referralId = referralId;
-            this.referralIdSet = true;
-        }
-
-        // True when the request body explicitly included a "referralId" key
-        // (even if its value was null, meaning "unlink"). Lets the service
-        // tell "field omitted -> leave unchanged" apart from "field sent as
-        // null -> remove the referral link", the same way every other PATCH
-        // field is handled, but for a nullable foreign key.
-        public boolean isReferralIdSet() {
-            return referralIdSet;
-        }
-    }
-
-    public static class JobResponse {
-        private Long id;
-        private String company;
-        private String roleName;
-        private String jobUrl;
-        private String jobDescription;
-        private String jobType;
-        private String location;
-        private String salary;
-        private String companySize;
-        private LocalDate postedDate;
-
         public Boolean getHasReferral() {
             return hasReferral;
         }
@@ -306,12 +339,12 @@ public class JobDTO {
             this.hasReferral = hasReferral;
         }
 
-        public String getReferralStatus() {
-            return referralStatus;
+        public String getReferrerName() {
+            return referrerName;
         }
 
-        public void setReferralStatus(String referralStatus) {
-            this.referralStatus = referralStatus;
+        public void setReferrerName(String referrerName) {
+            this.referrerName = referrerName;
         }
 
         public String getReferrerContact() {
@@ -330,6 +363,22 @@ public class JobDTO {
             this.referrerRelation = referrerRelation;
         }
 
+        public String getReferralStatus() {
+            return referralStatus;
+        }
+
+        public void setReferralStatus(String referralStatus) {
+            this.referralStatus = referralStatus;
+        }
+
+        public LocalDate getReferralRequestedDate() {
+            return referralRequestedDate;
+        }
+
+        public void setReferralRequestedDate(LocalDate referralRequestedDate) {
+            this.referralRequestedDate = referralRequestedDate;
+        }
+
         public String getReferralNotes() {
             return referralNotes;
         }
@@ -338,20 +387,45 @@ public class JobDTO {
             this.referralNotes = referralNotes;
         }
 
+        private Long referralId;
+
+        public Long getReferralId() {
+            return referralId;
+        }
+
+        public void setReferralId(Long referralId) {
+            this.referralId = referralId;
+        }
+
+        public boolean isReferralIdSet() {
+            return referralId != null;
+        }
+    }
+
+    public static class JobResponse {
+        private Long id;
+        private String company;
+        private String roleName;
+        private String jobUrl;
+        private String jobDescription;
+        private String jobType;
+        private String location;
+        private String salary;
+        private String companySize;
+        private LocalDate postedDate;
         private LocalDate deadline;
         private String status;
         private String notes;
         private String createdAt;
         private String updatedAt;
-        private Long referralId;
-        private String referrerName;
-        private String referrerRelationship;
-        private String referrerCompany;
         private Boolean hasReferral;
-        private String referralStatus;
+        private String referrerName;
         private String referrerContact;
         private String referrerRelation;
+        private String referralStatus;
+        private LocalDate referralRequestedDate;
         private String referralNotes;
+        private Long referralId;
 
         public JobResponse() {
         }
@@ -375,8 +449,6 @@ public class JobDTO {
             this.notes = notes;
             this.createdAt = createdAt;
             this.updatedAt = updatedAt;
-
-           
         }
 
         public Long getId() {
@@ -499,12 +571,12 @@ public class JobDTO {
             this.updatedAt = updatedAt;
         }
 
-        public Long getReferralId() {
-            return referralId;
+        public Boolean getHasReferral() {
+            return hasReferral;
         }
 
-        public void setReferralId(Long referralId) {
-            this.referralId = referralId;
+        public void setHasReferral(Boolean hasReferral) {
+            this.hasReferral = hasReferral;
         }
 
         public String getReferrerName() {
@@ -515,22 +587,53 @@ public class JobDTO {
             this.referrerName = referrerName;
         }
 
-        public String getReferrerRelationship() {
-            return referrerRelationship;
+        public String getReferrerContact() {
+            return referrerContact;
         }
 
-        public void setReferrerRelationship(String referrerRelationship) {
-            this.referrerRelationship = referrerRelationship;
+        public void setReferrerContact(String referrerContact) {
+            this.referrerContact = referrerContact;
         }
 
-        public String getReferrerCompany() {
-            return referrerCompany;
+        public String getReferrerRelation() {
+            return referrerRelation;
         }
 
-        public void setReferrerCompany(String referrerCompany) {
-            this.referrerCompany = referrerCompany;
+        public void setReferrerRelation(String referrerRelation) {
+            this.referrerRelation = referrerRelation;
         }
 
+        public String getReferralStatus() {
+            return referralStatus;
+        }
+
+        public void setReferralStatus(String referralStatus) {
+            this.referralStatus = referralStatus;
+        }
+
+        public LocalDate getReferralRequestedDate() {
+            return referralRequestedDate;
+        }
+
+        public void setReferralRequestedDate(LocalDate referralRequestedDate) {
+            this.referralRequestedDate = referralRequestedDate;
+        }
+
+        public String getReferralNotes() {
+            return referralNotes;
+        }
+
+        public void setReferralNotes(String referralNotes) {
+            this.referralNotes = referralNotes;
+        }
+
+        public Long getReferralId() {
+            return referralId;
+        }
+
+        public void setReferralId(Long referralId) {
+            this.referralId = referralId;
+        }
     }
 
     public static class JobListResponse {

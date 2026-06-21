@@ -117,23 +117,3 @@ function setButtonLoading(button, loading, loadingText = "Please wait...") {
     button.innerHTML = button.dataset.originalText || button.innerHTML;
   }
 }
-
-// Shared formatting helpers used by both jobs.js and referrals.js.
-
-function formatLabel(value) {
-  if (!value) return "";
-  return value
-    .toLowerCase()
-    .split("_")
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(" ");
-}
-
-function escapeHtml(str) {
-  if (str === null || str === undefined) return "";
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}

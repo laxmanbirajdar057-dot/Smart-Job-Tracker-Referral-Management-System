@@ -1,5 +1,12 @@
 package com.job.tracker.service;
 
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.job.tracker.dto.ReferralDTO.CreateReferralRequest;
 import com.job.tracker.dto.ReferralDTO.ReferralListResponse;
 import com.job.tracker.dto.ReferralDTO.ReferralResponse;
@@ -11,12 +18,6 @@ import com.job.tracker.entity.User;
 import com.job.tracker.repository.JobRepository;
 import com.job.tracker.repository.ReferralRepository;
 import com.job.tracker.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class ReferralService {

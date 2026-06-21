@@ -1,8 +1,22 @@
 package com.job.tracker.entity;
 
-import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "jobs")
@@ -16,7 +30,7 @@ public class Job {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToOne(mappedBy="job", fetch=FetchType.LAZY)
+    @OneToOne(mappedBy = "job", fetch = FetchType.LAZY)
     // @JoinColumn(name = "referral_id")
     private Referral referral;
 
@@ -56,14 +70,23 @@ public class Job {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(nullable = false)
+    private Boolean hasReferral = false;
+
+    private String referrerName;
+
+    private String referrerContact;
+    
+    private String referrerRelation;
+
     public Job() {
     }
 
     public Job(Long id, User user, String company, String roleName, String jobUrl,
-                String jobDescription, JobType jobType, String location, String salary,
-                String companySize, LocalDate postedDate, LocalDate deadline,
-                ApplicationStatus status, String notes, LocalDateTime createdAt,
-                LocalDateTime updatedAt) {
+            String jobDescription, JobType jobType, String location, String salary,
+            String companySize, LocalDate postedDate, LocalDate deadline,
+            ApplicationStatus status, String notes, LocalDateTime createdAt,
+            LocalDateTime updatedAt) {
         this.id = id;
         this.user = user;
         this.company = company;
@@ -237,5 +260,37 @@ public class Job {
 
     public enum ApplicationStatus {
         SAVED, APPLIED, SCREENING, TECHNICAL_ROUND, HR_ROUND, OFFER, REJECTED, NEGOTIATING
+    }
+
+    public boolean isHasReferral() {
+        return hasReferral;
+    }
+
+    public void setHasReferral(boolean hasReferral) {
+        this.hasReferral = hasReferral;
+    }
+
+    public String getReferrerName() {
+        return referrerName;
+    }
+
+    public void setReferrerName(String referrerName) {
+        this.referrerName = referrerName;
+    }
+
+    public String getReferrerContact() {
+        return referrerContact;
+    }
+
+    public void setReferrerContact(String referrerContact) {
+        this.referrerContact = referrerContact;
+    }
+
+    public String getReferrerRelation() {
+        return referrerRelation;
+    }
+
+    public void setReferrerRelation(String referrerRelation) {
+        this.referrerRelation = referrerRelation;
     }
 }
