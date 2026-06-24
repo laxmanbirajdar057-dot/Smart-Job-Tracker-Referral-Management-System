@@ -18,6 +18,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
+
 @Entity
 @Table(name = "jobs")
 public class Job {
@@ -80,6 +81,12 @@ public class Job {
     private String referrerRelation;
 
     private String referralStatus;
+
+
+    //resume 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "resume_id")
+    private Resume resume;
 
     public Job() {
     }
@@ -302,5 +309,13 @@ public class Job {
 
     public void setReferralStatus(String referralStatus) {
         this.referralStatus = referralStatus;
+    }
+
+    public Resume getResume() {
+        return resume;
+    }
+
+    public void setResume(Resume resume) {
+        this.resume = resume;
     }
 }

@@ -13,9 +13,11 @@ import com.job.tracker.dto.JobDTO.JobResponse;
 import com.job.tracker.dto.JobDTO.UpdateJobRequest;
 import com.job.tracker.entity.Job;
 import com.job.tracker.entity.Referral;
+import com.job.tracker.entity.Resume;
 import com.job.tracker.entity.User;
 import com.job.tracker.repository.JobRepository;
 import com.job.tracker.repository.ReferralRepository;
+import com.job.tracker.repository.ResumeRepository;
 import com.job.tracker.repository.UserRepository;
 
 @Service
@@ -29,6 +31,9 @@ public class JobService {
 
     @Autowired
     private ReferralRepository referralRepository;
+
+    @Autowired
+    private ResumeRepository resumeRepository;
 
     private static final DateTimeFormatter TIMESTAMP_FORMAT = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
@@ -61,6 +66,11 @@ public class JobService {
         if (request.getReferralId() != null) {
             referral = resolveReferral(request.getReferralId(), userId);
             job.setReferral(referral);
+        }
+        if (request.getResumeId() != null) {
+            Resume resume = resumeRepository.findByIdAndUserId(request.getResumeId(), userId)
+                    .orElseThrow(() -> new RuntimeException("Resume not found"));
+            job.setResume(resume);
         }
 
         job = jobRepository.save(job);
@@ -231,6 +241,11 @@ public class JobService {
             response.setReferrerContact(job.getReferrerContact());
             response.setReferrerRelation(job.getReferrerRelation());
             response.setReferralStatus(job.getReferralStatus()); // needs field on Job entity — see note below
+        }
+        if (job.getResume() != null) {
+            response.setResumeId(job.getResume().getId());
+            response.setResumeLabel(job.getResume().getLabel());
+            response.setResumeFileName(job.getResume().getCvFileName());
         }
 
         return response;

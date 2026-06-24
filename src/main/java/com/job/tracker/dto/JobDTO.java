@@ -26,7 +26,7 @@ public class JobDTO {
         private LocalDate referralRequestedDate;
         private String referralNotes;
         private Long referralId;
-
+        private Long resumeId;
 
         public CreateJobRequest() {
         }
@@ -207,6 +207,14 @@ public class JobDTO {
         public void setReferralId(Long referralId) {
             this.referralId = referralId;
         }
+
+        public Long getResumeId() {
+            return resumeId;
+        }
+
+        public void setResumeId(Long resumeId) {
+            this.resumeId = resumeId;
+        }
     }
 
     public static class UpdateJobRequest {
@@ -228,6 +236,7 @@ public class JobDTO {
         private String referralStatus;
         private LocalDate referralRequestedDate;
         private String referralNotes;
+        private Long resumeId;
 
         public UpdateJobRequest() {
         }
@@ -405,6 +414,14 @@ public class JobDTO {
         public boolean isReferralIdSet() {
             return referralId != null;
         }
+
+        public Long getResumeId() {
+            return resumeId;
+        }
+
+        public void setResumeId(Long resumeId) {
+            this.resumeId = resumeId;
+        }
     }
 
     public static class JobResponse {
@@ -431,6 +448,35 @@ public class JobDTO {
         private LocalDate referralRequestedDate;
         private String referralNotes;
         private Long referralId;
+        private Long resumeId;
+        public Long getResumeId() {
+            return resumeId;
+        }
+
+        public void setResumeId(Long resumeId) {
+            this.resumeId = resumeId;
+        }
+
+        public String getResumeLabel() {
+            return resumeLabel;
+        }
+
+        public void setResumeLabel(String resumeLabel) {
+            this.resumeLabel = resumeLabel;
+        }
+
+        public String getResumeFileName() {
+            return resumeFileName;
+        }
+
+        public void setResumeFileName(String resumeFileName) {
+            this.resumeFileName = resumeFileName;
+        }
+
+        private String resumeLabel; // shows "Backend-Java-CV" on job card
+        private String resumeFileName; // shows "laxman_cv_v2.pdf"
+
+        // getters and setters for all three
 
         public JobResponse() {
         }
@@ -639,6 +685,7 @@ public class JobDTO {
         public void setReferralId(Long referralId) {
             this.referralId = referralId;
         }
+
     }
 
     public static class JobListResponse {

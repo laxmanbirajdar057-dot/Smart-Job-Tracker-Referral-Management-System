@@ -5,6 +5,12 @@ spring:
     password: Laxman@31
     driver-class-name: com.mysql.cj.jdbc.Driver
 
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 5MB
+      max-request-size: 5MB
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -31,3 +37,4 @@ logging:
     root: INFO
     com.jobtracker: DEBUG
     org.springframework.security: DEBUG
+
