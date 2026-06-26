@@ -1,21 +1,8 @@
-// Dashboard page: loads jobs + stats, and handles the add/edit/delete modal.
-// Now referral-aware: every job can carry referral-request details
-// (referrer, contact, relation, referral status, notes) independent of
-// the application status.
-
 const STATUS_VALUES = [
-  "SAVED",
-  "APPLIED",
-  "SCREENING",
-  "TECHNICAL_ROUND",
-  "HR_ROUND",
-  "OFFER",
-  "REJECTED",
-  "NEGOTIATING",
+  "SAVED", "APPLIED", "SCREENING", "TECHNICAL_ROUND",
+  "HR_ROUND", "OFFER", "REJECTED", "NEGOTIATING",
 ];
-
 const JOB_TYPE_VALUES = ["FULL_TIME", "PART_TIME", "CONTRACT", "INTERNSHIP", "TEMPORARY"];
-
 const REFERRAL_STATUS_VALUES = ["NOT_REQUESTED", "REQUESTED", "REFERRED", "NO_RESPONSE", "DECLINED"];
 
 let allJobs = [];
@@ -46,6 +33,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.target.id === "modalOverlay") closeModal();
   });
 
+  document.getElementById("resumeFile").addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    document.getElementById("resumeFileName").textContent = file ? file.name : "No file chosen";
+  });
+
   loadDashboard();
 });
 
@@ -65,7 +57,6 @@ async function loadStats() {
 async function loadJobs() {
   const container = document.getElementById("jobList");
   container.innerHTML = `<div class="empty-state">Loading your applications...</div>`;
-
   try {
     const response = await apiFetch("/jobs");
     allJobs = response.data || [];
@@ -77,19 +68,19 @@ async function loadJobs() {
 }
 
 function renderStatusBreakdown(jobs) {
-  const applied = jobs.filter((j) => j.status !== "SAVED").length;
-  const offers = jobs.filter((j) => j.status === "OFFER" || j.status === "NEGOTIATING").length;
-  const rejected = jobs.filter((j) => j.status === "REJECTED").length;
+  const applied   = jobs.filter((j) => j.status !== "SAVED").length;
+  const offers    = jobs.filter((j) => j.status === "OFFER" || j.status === "NEGOTIATING").length;
+  const rejected  = jobs.filter((j) => j.status === "REJECTED").length;
   const referrals = jobs.filter((j) => j.referralStatus === "REFERRED").length;
 
-  document.getElementById("appliedCount").textContent = applied;
-  document.getElementById("offerCount").textContent = offers;
+  document.getElementById("appliedCount").textContent  = applied;
+  document.getElementById("offerCount").textContent    = offers;
   document.getElementById("rejectedCount").textContent = rejected;
   document.getElementById("referralCount").textContent = referrals;
 }
 
 function applyFilter() {
-  const status = document.getElementById("statusFilter").value;
+  const status   = document.getElementById("statusFilter").value;
   const referral = document.getElementById("referralFilter").value;
 
   let filtered = status ? allJobs.filter((j) => j.status === status) : allJobs;
@@ -115,42 +106,47 @@ function renderJobs(jobs) {
     return;
   }
 
-  container.innerHTML = jobs
-    .map((job) => {
-      const statusLabel = formatLabel(job.status);
-      const typeLabel = job.jobType ? formatLabel(job.jobType) : null;
-      const referralStatus = job.referralStatus || "NOT_REQUESTED";
-      const referralLabel = formatLabel(referralStatus);
+  container.innerHTML = jobs.map((job) => {
+    const statusLabel    = formatLabel(job.status);
+    const typeLabel      = job.jobType ? formatLabel(job.jobType) : null;
+    const referralStatus = job.referralStatus || "NOT_REQUESTED";
+    const referralLabel  = formatLabel(referralStatus);
 
-      const referralChip = job.hasReferral
-        ? `<span class="referral-chip referral-${referralStatus}" title="${job.referrerName ? escapeHtml(job.referrerName) : "Referral"}">
-             🤝 ${referralLabel}${job.referrerName ? ` · ${escapeHtml(job.referrerName)}` : ""}
-           </span>`
-        : `<span class="referral-chip referral-NOT_REQUESTED">No referral yet</span>`;
+    const referralChip = job.hasReferral
+      ? `<span class="referral-chip referral-${referralStatus}" title="${job.referrerName ? escapeHtml(job.referrerName) : "Referral"}">
+           🤝 ${referralLabel}${job.referrerName ? ` · ${escapeHtml(job.referrerName)}` : ""}
+         </span>`
+      : `<span class="referral-chip referral-NOT_REQUESTED">No referral yet</span>`;
 
-      return `
-        <div class="job-card" data-id="${job.id}">
-          <div class="job-main">
-            <h3>${escapeHtml(job.roleName)}</h3>
-            <div class="company">${escapeHtml(job.company)}</div>
-            <div class="job-meta">
-              ${typeLabel ? `<span>${typeLabel}</span>` : ""}
-              ${job.location ? `<span>${escapeHtml(job.location)}</span>` : ""}
-              ${job.salary ? `<span>${escapeHtml(job.salary)}</span>` : ""}
-              ${job.deadline ? `<span>Deadline: ${job.deadline}</span>` : ""}
-            </div>
-            <div class="referral-row">${referralChip}</div>
+    const cvBadge = job.resumeLabel
+      ? `<span class="cv-badge">📄 ${escapeHtml(job.resumeLabel)}${job.resumeVersion ? ` <span class="cv-version">${escapeHtml(job.resumeVersion)}</span>` : ""}</span>`
+      : `<span class="cv-badge cv-badge-empty" onclick="openModal(${job.id})">📎 Attach CV</span>`;
+
+    return `
+      <div class="job-card" data-id="${job.id}">
+        <div class="job-main">
+          <h3>${escapeHtml(job.roleName)}</h3>
+          <div class="company">${escapeHtml(job.company)}</div>
+          <div class="job-meta">
+            ${typeLabel ? `<span>${typeLabel}</span>` : ""}
+            ${job.location ? `<span>${escapeHtml(job.location)}</span>` : ""}
+            ${job.salary ? `<span>${escapeHtml(job.salary)}</span>` : ""}
+            ${job.deadline ? `<span>Deadline: ${job.deadline}</span>` : ""}
           </div>
-          <div class="job-actions">
-            <span class="status-badge status-${job.status}">${statusLabel}</span>
-            <div class="job-actions-row">
-              <button class="btn btn-secondary btn-sm" onclick="openModal(${job.id})">Edit</button>
-              <button class="btn btn-danger btn-sm" onclick="handleDeleteJob(${job.id})">Delete</button>
-            </div>
+          <div class="job-chips-row">
+            ${referralChip}
+            ${cvBadge}
           </div>
-        </div>`;
-    })
-    .join("");
+        </div>
+        <div class="job-actions">
+          <span class="status-badge status-${job.status}">${statusLabel}</span>
+          <div class="job-actions-row">
+            <button class="btn btn-secondary btn-sm" onclick="openModal(${job.id})">Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="handleDeleteJob(${job.id})">Delete</button>
+          </div>
+        </div>
+      </div>`;
+  }).join("");
 }
 
 function openModal(jobId = null) {
@@ -159,36 +155,45 @@ function openModal(jobId = null) {
   form.reset();
   populateSelectOptions();
 
+  document.getElementById("resumeFile").value = "";
+  document.getElementById("resumeFileName").textContent = "No file chosen";
+  document.getElementById("resumeUploadStatus").textContent = "";
+
   document.getElementById("modalTitle").textContent = jobId ? "Edit Job" : "Add Job";
 
   if (jobId) {
     const job = allJobs.find((j) => j.id === jobId);
     if (job) {
-      document.getElementById("company").value = job.company || "";
-      document.getElementById("roleName").value = job.roleName || "";
-      document.getElementById("jobUrl").value = job.jobUrl || "";
-      document.getElementById("location").value = job.location || "";
-      document.getElementById("salary").value = job.salary || "";
-      document.getElementById("companySize").value = job.companySize || "";
-      document.getElementById("deadline").value = job.deadline || "";
-      document.getElementById("jobType").value = job.jobType || "";
-      document.getElementById("status").value = job.status || "SAVED";
+      document.getElementById("company").value        = job.company || "";
+      document.getElementById("roleName").value       = job.roleName || "";
+      document.getElementById("jobUrl").value         = job.jobUrl || "";
+      document.getElementById("location").value       = job.location || "";
+      document.getElementById("salary").value         = job.salary || "";
+      document.getElementById("companySize").value    = job.companySize || "";
+      document.getElementById("deadline").value       = job.deadline || "";
+      document.getElementById("jobType").value        = job.jobType || "";
+      document.getElementById("status").value         = job.status || "SAVED";
       document.getElementById("jobDescription").value = job.jobDescription || "";
-      document.getElementById("notes").value = job.notes || "";
+      document.getElementById("notes").value          = job.notes || "";
 
-      document.getElementById("hasReferral").checked = !!job.hasReferral;
-      document.getElementById("referrerName").value = job.referrerName || "";
-      document.getElementById("referrerRelation").value = job.referrerRelation || "";
-      document.getElementById("referrerContact").value = job.referrerContact || "";
-      document.getElementById("referralRequestedDate").value = job.referralRequestedDate || "";
-      document.getElementById("referralStatus").value = job.referralStatus || "NOT_REQUESTED";
-      document.getElementById("referralNotes").value = job.referralNotes || "";
+      document.getElementById("hasReferral").checked          = !!job.hasReferral;
+      document.getElementById("referrerName").value           = job.referrerName || "";
+      document.getElementById("referrerRelation").value       = job.referrerRelation || "";
+      document.getElementById("referrerContact").value        = job.referrerContact || "";
+      document.getElementById("referralRequestedDate").value  = job.referralRequestedDate || "";
+      document.getElementById("referralStatus").value         = job.referralStatus || "NOT_REQUESTED";
+      document.getElementById("referralNotes").value          = job.referralNotes || "";
+
+      document.getElementById("resumeLabel").value   = job.resumeLabel || "";
+      document.getElementById("resumeVersion").value = job.resumeVersion || "";
+      if (job.resumeFileName) {
+        document.getElementById("resumeFileName").textContent = "✅ " + job.resumeFileName;
+      }
 
       populateJobReferralSelect(job.referralId || "");
-
     }
   } else {
-    document.getElementById("status").value = "SAVED";
+    document.getElementById("status").value         = "SAVED";
     document.getElementById("referralStatus").value = "NOT_REQUESTED";
   }
 
@@ -199,6 +204,9 @@ function openModal(jobId = null) {
 function closeModal() {
   document.getElementById("modalOverlay").classList.remove("visible");
   editingJobId = null;
+  document.getElementById("resumeFile").value = "";
+  document.getElementById("resumeFileName").textContent = "No file chosen";
+  document.getElementById("resumeUploadStatus").textContent = "";
 }
 
 function toggleReferralFields() {
@@ -207,8 +215,8 @@ function toggleReferralFields() {
 }
 
 function populateSelectOptions() {
-  const typeSelect = document.getElementById("jobType");
-  const statusSelect = document.getElementById("status");
+  const typeSelect           = document.getElementById("jobType");
+  const statusSelect         = document.getElementById("status");
   const referralStatusSelect = document.getElementById("referralStatus");
 
   typeSelect.innerHTML =
@@ -231,26 +239,28 @@ async function handleSaveJob(event) {
   const hasReferral = document.getElementById("hasReferral").checked;
 
   const payload = {
-    company: document.getElementById("company").value.trim(),
-    roleName: document.getElementById("roleName").value.trim(),
-    jobUrl: document.getElementById("jobUrl").value.trim() || null,
-    location: document.getElementById("location").value.trim() || null,
-    salary: document.getElementById("salary").value.trim() || null,
-    companySize: document.getElementById("companySize").value.trim() || null,
-    deadline: document.getElementById("deadline").value || null,
-    jobType: document.getElementById("jobType").value || null,
-    status: document.getElementById("status").value || "SAVED",
+    company:        document.getElementById("company").value.trim(),
+    roleName:       document.getElementById("roleName").value.trim(),
+    jobUrl:         document.getElementById("jobUrl").value.trim() || null,
+    location:       document.getElementById("location").value.trim() || null,
+    salary:         document.getElementById("salary").value.trim() || null,
+    companySize:    document.getElementById("companySize").value.trim() || null,
+    deadline:       document.getElementById("deadline").value || null,
+    jobType:        document.getElementById("jobType").value || null,
+    status:         document.getElementById("status").value || "SAVED",
     jobDescription: document.getElementById("jobDescription").value.trim() || null,
-    notes: document.getElementById("notes").value.trim() || null,
-    referralId: document.getElementById("referralId").value || null,
+    notes:          document.getElementById("notes").value.trim() || null,
+    referralId:     document.getElementById("referralId").value || null,
+    resumeLabel:    document.getElementById("resumeLabel").value.trim() || null,
+    resumeVersion:  document.getElementById("resumeVersion").value.trim() || null,
 
-    hasReferral: hasReferral,
-    referrerName: hasReferral ? document.getElementById("referrerName").value.trim() || null : null,
-    referrerRelation: hasReferral ? document.getElementById("referrerRelation").value.trim() || null : null,
-    referrerContact: hasReferral ? document.getElementById("referrerContact").value.trim() || null : null,
+    hasReferral,
+    referrerName:          hasReferral ? document.getElementById("referrerName").value.trim() || null : null,
+    referrerRelation:      hasReferral ? document.getElementById("referrerRelation").value.trim() || null : null,
+    referrerContact:       hasReferral ? document.getElementById("referrerContact").value.trim() || null : null,
     referralRequestedDate: hasReferral ? document.getElementById("referralRequestedDate").value || null : null,
-    referralStatus: hasReferral ? document.getElementById("referralStatus").value || "REQUESTED" : "NOT_REQUESTED",
-    referralNotes: hasReferral ? document.getElementById("referralNotes").value.trim() || null : null,
+    referralStatus:        hasReferral ? document.getElementById("referralStatus").value || "REQUESTED" : "NOT_REQUESTED",
+    referralNotes:         hasReferral ? document.getElementById("referralNotes").value.trim() || null : null,
   };
 
   if (!payload.company || !payload.roleName) {
@@ -261,20 +271,25 @@ async function handleSaveJob(event) {
   setButtonLoading(saveBtn, true, "Saving...");
 
   try {
+    let savedJob;
     if (editingJobId) {
-      await apiFetch(`/jobs/${editingJobId}`, {
+      savedJob = await apiFetch(`/jobs/${editingJobId}`, {
         method: "PATCH",
         body: JSON.stringify(payload),
       });
       showToast("Job updated.");
     } else {
-      // postedDate is only on create, default to today
       payload.postedDate = new Date().toISOString().slice(0, 10);
-      await apiFetch("/jobs", {
+      savedJob = await apiFetch("/jobs", {
         method: "POST",
         body: JSON.stringify(payload),
       });
-      showToast("Job added.");
+      showToast("Job saved.");
+    }
+
+    const fileInput = document.getElementById("resumeFile");
+    if (fileInput.files.length > 0 && savedJob && savedJob.id) {
+      await uploadResumeFile(savedJob.id, fileInput.files[0], payload.resumeLabel);
     }
 
     closeModal();
@@ -286,9 +301,30 @@ async function handleSaveJob(event) {
   }
 }
 
+async function uploadResumeFile(jobId, file, label) {
+  const statusEl = document.getElementById("resumeUploadStatus");
+  statusEl.textContent = "Uploading CV...";
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("label", label || file.name);
+    const token = localStorage.getItem("token");
+    const res = await fetch("/api/resumes/upload", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    });
+    if (!res.ok) throw new Error();
+    statusEl.textContent = "✅ CV uploaded";
+    statusEl.style.color = "#4cb782";
+  } catch {
+    statusEl.textContent = "⚠️ CV upload failed — job was saved";
+    statusEl.style.color = "#e25c5c";
+  }
+}
+
 async function handleDeleteJob(jobId) {
   if (!confirm("Delete this application? This can't be undone.")) return;
-
   try {
     await apiFetch(`/jobs/${jobId}`, { method: "DELETE" });
     showToast("Job deleted.");
@@ -300,11 +336,7 @@ async function handleDeleteJob(jobId) {
 
 function formatLabel(value) {
   if (!value) return "";
-  return value
-    .toLowerCase()
-    .split("_")
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(" ");
+  return value.toLowerCase().split("_").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
 }
 
 function escapeHtml(str) {

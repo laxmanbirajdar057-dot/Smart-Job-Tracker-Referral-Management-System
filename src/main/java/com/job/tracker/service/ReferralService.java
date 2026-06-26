@@ -60,9 +60,7 @@ public class ReferralService {
 
         return toReferralResponse(referral);
 
-        
     }
-    
 
     public ReferralListResponse getAllReferrals(Long userId) {
         List<Referral> referrals = referralRepository.findByUserIdOrderByCreatedAtDesc(userId);
@@ -84,6 +82,10 @@ public class ReferralService {
     }
 
     public ReferralResponse updateReferral(Long id, Long userId, UpdateReferralRequest request) {
+
+        System.out.println("===== UPDATE REFERRAL =====");
+        System.out.println("Referral ID = " + id);
+        System.out.println("Status from request = " + request.getStatus());
         Referral referral = referralRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new RuntimeException("Referral not found"));
 
