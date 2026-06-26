@@ -77,14 +77,29 @@ async function loadJobs() {
   }
 }
 
+
+// ===================== VIEW JOB =====================
+
+
+
+function viewResume(resumeId) {
+  const token = Auth.getToken();
+  if (!token) {
+    showToast("You are not logged in.", "error");
+    return;
+  }
+  const url = `/api/resumes/${resumeId}/view?token=${encodeURIComponent(token)}`;
+  window.open(url, "_blank");
+}
+
 function renderStatusBreakdown(jobs) {
-  const applied   = jobs.filter((j) => j.status !== "SAVED").length;
-  const offers    = jobs.filter((j) => j.status === "OFFER" || j.status === "NEGOTIATING").length;
-  const rejected  = jobs.filter((j) => j.status === "REJECTED").length;
+  const applied = jobs.filter((j) => j.status !== "SAVED").length;
+  const offers = jobs.filter((j) => j.status === "OFFER" || j.status === "NEGOTIATING").length;
+  const rejected = jobs.filter((j) => j.status === "REJECTED").length;
   const referrals = jobs.filter((j) => j.referralStatus === "REFERRED").length;
 
-  document.getElementById("appliedCount").textContent  = applied;
-  document.getElementById("offerCount").textContent    = offers;
+  document.getElementById("appliedCount").textContent = applied;
+  document.getElementById("offerCount").textContent = offers;
   document.getElementById("rejectedCount").textContent = rejected;
   document.getElementById("referralCount").textContent = referrals;
 }
@@ -92,7 +107,7 @@ function renderStatusBreakdown(jobs) {
 // ===================== FILTER + RENDER =====================
 
 function applyFilter() {
-  const status   = document.getElementById("statusFilter").value;
+  const status = document.getElementById("statusFilter").value;
   const referral = document.getElementById("referralFilter").value;
 
   let filtered = status ? allJobs.filter((j) => j.status === status) : allJobs;
@@ -119,22 +134,25 @@ function renderJobs(jobs) {
   }
 
   container.innerHTML = jobs.map((job) => {
-    const statusLabel    = formatLabel(job.status);
-    const typeLabel      = job.jobType ? formatLabel(job.jobType) : null;
+    const statusLabel = formatLabel(job.status);
+    const typeLabel = job.jobType ? formatLabel(job.jobType) : null;
     const referralStatus = job.referralStatus || "NOT_REQUESTED";
-    const referralLabel  = formatLabel(referralStatus);
+    const referralLabel = formatLabel(referralStatus);
 
     // Referral chip
     const referralChip = job.hasReferral
-      ? `<span class="referral-chip ref-${referralStatus.toLowerCase().replace('_','-')}">
+      ? `<span class="referral-chip ref-${referralStatus.toLowerCase().replace('_', '-')}">
            🤝 ${referralLabel}${job.referrerName ? ` · ${escapeHtml(job.referrerName)}` : ""}
          </span>`
       : `<span class="referral-chip ref-none">No referral yet</span>`;
 
     // CV badge
-    const cvBadge = job.resumeLabel
-      ? `<span class="cv-badge">📄 ${escapeHtml(job.resumeLabel)}${job.resumeVersion ? ` <span class="cv-version">${escapeHtml(job.resumeVersion)}</span>` : ""}</span>`
-      : `<span class="cv-badge cv-badge-empty" onclick="openModal(${job.id})">📎 Attach CV</span>`;
+const cvDisplay = job.resumeLabel || job.resumeFileName;
+const cvBadge = cvDisplay && job.resumeId
+  ? `<span class="cv-badge" onclick="viewResume(${job.resumeId})" style="cursor:pointer;" title="View ${escapeHtml(job.resumeFileName || '')}">
+       📄 ${escapeHtml(cvDisplay)}${job.resumeFileName ? ` <span class="cv-version">${escapeHtml(job.resumeFileName)}</span>` : ""}
+     </span>`
+  : `<span class="cv-badge cv-badge-empty" onclick="openModal(${job.id})">📎 Attach CV</span>`;
 
     // Company initial logo
     const initial = (job.company || "?")[0].toUpperCase();
@@ -184,38 +202,38 @@ function openModal(jobId = null) {
   if (jobId) {
     const job = allJobs.find((j) => j.id === jobId);
     if (job) {
-      document.getElementById("job_company").value        = job.company || "";
-      document.getElementById("job_roleName").value       = job.roleName || "";
-      document.getElementById("job_jobUrl").value         = job.jobUrl || "";
-      document.getElementById("job_location").value       = job.location || "";
-      document.getElementById("job_salary").value         = job.salary || "";
-      document.getElementById("job_companySize").value    = job.companySize || "";
-      document.getElementById("job_deadline").value       = job.deadline || "";
-      document.getElementById("job_jobType").value        = job.jobType || "";
-      document.getElementById("job_status").value         = job.status || "SAVED";
+      document.getElementById("job_company").value = job.company || "";
+      document.getElementById("job_roleName").value = job.roleName || "";
+      document.getElementById("job_jobUrl").value = job.jobUrl || "";
+      document.getElementById("job_location").value = job.location || "";
+      document.getElementById("job_salary").value = job.salary || "";
+      document.getElementById("job_companySize").value = job.companySize || "";
+      document.getElementById("job_deadline").value = job.deadline || "";
+      document.getElementById("job_jobType").value = job.jobType || "";
+      document.getElementById("job_status").value = job.status || "SAVED";
       document.getElementById("job_jobDescription").value = job.jobDescription || "";
-      document.getElementById("job_notes").value          = job.notes || "";
+      document.getElementById("job_notes").value = job.notes || "";
 
       // Resume
-      document.getElementById("job_resumeLabel").value   = job.resumeLabel || "";
+      document.getElementById("job_resumeLabel").value = job.resumeLabel || "";
       document.getElementById("job_resumeVersion").value = job.resumeVersion || "";
       if (job.resumeFileName) {
         document.getElementById("job_resumeFileName").textContent = "✅ " + job.resumeFileName;
       }
 
       // Referral
-      document.getElementById("job_hasReferral").checked         = !!job.hasReferral;
-      document.getElementById("job_referrerName").value          = job.referrerName || "";
-      document.getElementById("job_referrerRelation").value      = job.referrerRelation || "";
-      document.getElementById("job_referrerContact").value       = job.referrerContact || "";
+      document.getElementById("job_hasReferral").checked = !!job.hasReferral;
+      document.getElementById("job_referrerName").value = job.referrerName || "";
+      document.getElementById("job_referrerRelation").value = job.referrerRelation || "";
+      document.getElementById("job_referrerContact").value = job.referrerContact || "";
       document.getElementById("job_referralRequestedDate").value = job.referralRequestedDate || "";
-      document.getElementById("job_referralStatus").value        = job.referralStatus || "NOT_REQUESTED";
-      document.getElementById("job_referralNotes").value         = job.referralNotes || "";
+      document.getElementById("job_referralStatus").value = job.referralStatus || "NOT_REQUESTED";
+      document.getElementById("job_referralNotes").value = job.referralNotes || "";
 
       populateJobReferralSelect(job.referralId || "");
     }
   } else {
-    document.getElementById("job_status").value         = "SAVED";
+    document.getElementById("job_status").value = "SAVED";
     document.getElementById("job_referralStatus").value = "NOT_REQUESTED";
     populateJobReferralSelect("");
   }
@@ -265,27 +283,27 @@ async function handleSaveJob(event) {
   const hasReferral = document.getElementById("job_hasReferral").checked;
 
   const payload = {
-    company:        document.getElementById("job_company").value.trim(),
-    roleName:       document.getElementById("job_roleName").value.trim(),
-    jobUrl:         document.getElementById("job_jobUrl").value.trim() || null,
-    location:       document.getElementById("job_location").value.trim() || null,
-    salary:         document.getElementById("job_salary").value.trim() || null,
-    companySize:    document.getElementById("job_companySize").value.trim() || null,
-    deadline:       document.getElementById("job_deadline").value || null,
-    jobType:        document.getElementById("job_jobType").value || null,
-    status:         document.getElementById("job_status").value || "SAVED",
+    company: document.getElementById("job_company").value.trim(),
+    roleName: document.getElementById("job_roleName").value.trim(),
+    jobUrl: document.getElementById("job_jobUrl").value.trim() || null,
+    location: document.getElementById("job_location").value.trim() || null,
+    salary: document.getElementById("job_salary").value.trim() || null,
+    companySize: document.getElementById("job_companySize").value.trim() || null,
+    deadline: document.getElementById("job_deadline").value || null,
+    jobType: document.getElementById("job_jobType").value || null,
+    status: document.getElementById("job_status").value || "SAVED",
     jobDescription: document.getElementById("job_jobDescription").value.trim() || null,
-    notes:          document.getElementById("job_notes").value.trim() || null,
-    referralId:     document.getElementById("job_referralId").value || null,
-    resumeLabel:    document.getElementById("job_resumeLabel").value.trim() || null,
-    resumeVersion:  document.getElementById("job_resumeVersion").value.trim() || null,
+    notes: document.getElementById("job_notes").value.trim() || null,
+    referralId: document.getElementById("job_referralId").value || null,
+    resumeLabel: document.getElementById("job_resumeLabel").value.trim() || null,
+    resumeVersion: document.getElementById("job_resumeVersion").value.trim() || null,
     hasReferral,
-    referrerName:          hasReferral ? document.getElementById("job_referrerName").value.trim() || null : null,
-    referrerRelation:      hasReferral ? document.getElementById("job_referrerRelation").value.trim() || null : null,
-    referrerContact:       hasReferral ? document.getElementById("job_referrerContact").value.trim() || null : null,
+    referrerName: hasReferral ? document.getElementById("job_referrerName").value.trim() || null : null,
+    referrerRelation: hasReferral ? document.getElementById("job_referrerRelation").value.trim() || null : null,
+    referrerContact: hasReferral ? document.getElementById("job_referrerContact").value.trim() || null : null,
     referralRequestedDate: hasReferral ? document.getElementById("job_referralRequestedDate").value || null : null,
-    referralStatus:        hasReferral ? document.getElementById("job_referralStatus").value || "REQUESTED" : "NOT_REQUESTED",
-    referralNotes:         hasReferral ? document.getElementById("job_referralNotes").value.trim() || null : null,
+    referralStatus: hasReferral ? document.getElementById("job_referralStatus").value || "REQUESTED" : "NOT_REQUESTED",
+    referralNotes: hasReferral ? document.getElementById("job_referralNotes").value.trim() || null : null,
   };
 
   if (!payload.company || !payload.roleName) {
@@ -327,6 +345,9 @@ async function handleSaveJob(event) {
   }
 }
 
+// ===================== UPLOAD RESUME =====================
+
+
 async function uploadResumeFile(jobId, file, label) {
   const statusEl = document.getElementById("job_resumeUploadStatus");
   statusEl.textContent = "Uploading CV...";
@@ -341,9 +362,17 @@ async function uploadResumeFile(jobId, file, label) {
       body: formData,
     });
     if (!res.ok) throw new Error("Upload failed");
+
+    const uploadedResume = await res.json(); // ✅ get uploaded resume id
+
+    // ✅ Link resume to job via PATCH
+    await apiFetch(`/jobs/${jobId}`, {
+      method: "PATCH",
+      body: JSON.stringify({ resumeId: uploadedResume.id }),
+    });
+
     statusEl.textContent = "✅ CV uploaded";
     statusEl.style.color = "#4cb782";
-    // Refresh vault in sidebar
     if (typeof loadSidebarResumes === "function") loadSidebarResumes();
   } catch {
     statusEl.textContent = "⚠️ CV upload failed — job was saved";

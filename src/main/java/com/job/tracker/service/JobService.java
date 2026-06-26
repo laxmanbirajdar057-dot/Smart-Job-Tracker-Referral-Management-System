@@ -108,41 +108,58 @@ public class JobService {
 
         if (request.getCompany() != null)
             job.setCompany(request.getCompany());
+
         if (request.getRoleName() != null)
             job.setRoleName(request.getRoleName());
+
         if (request.getJobUrl() != null)
             job.setJobUrl(request.getJobUrl());
+
         if (request.getJobDescription() != null)
             job.setJobDescription(request.getJobDescription());
+
         if (request.getJobType() != null)
             job.setJobType(parseJobType(request.getJobType()));
+
         if (request.getLocation() != null)
             job.setLocation(request.getLocation());
+        
         if (request.getSalary() != null)
             job.setSalary(request.getSalary());
+
         if (request.getCompanySize() != null)
             job.setCompanySize(request.getCompanySize());
+
         if (request.getDeadline() != null)
             job.setDeadline(request.getDeadline());
+
         if (request.getStatus() != null)
             job.setStatus(parseStatus(request.getStatus()));
+
         if (request.getNotes() != null)
             job.setNotes(request.getNotes());
+
         if (request.getHasReferral() != null)
             job.setHasReferral(request.getHasReferral());
+
         if (request.getReferrerName() != null)
             job.setReferrerName(request.getReferrerName());
+
         if (request.getReferrerContact() != null)
             job.setReferrerContact(request.getReferrerContact());
+
         if (request.getReferrerRelation() != null)
             job.setReferrerRelation(request.getReferrerRelation());
+
         if (request.getReferralStatus() != null)
             job.setReferralStatus(request.getReferralStatus());
 
+        if (request.getResumeId() != null) {
+            Resume resume = resumeRepository.findByIdAndUserId(request.getResumeId(), userId)
+                    .orElseThrow(() -> new RuntimeException("Resume not found"));
+            job.setResume(resume);
+        }
         if (request.isReferralIdSet()) {
-            // referralId was explicitly present in the request body: null means
-            // "unlink the referral", a value means "link to this referral".
-
             Referral referral = null;
 
             if (request.getReferralId() != null) {

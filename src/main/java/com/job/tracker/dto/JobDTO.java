@@ -449,6 +449,7 @@ public class JobDTO {
         private String referralNotes;
         private Long referralId;
         private Long resumeId;
+        
         public Long getResumeId() {
             return resumeId;
         }

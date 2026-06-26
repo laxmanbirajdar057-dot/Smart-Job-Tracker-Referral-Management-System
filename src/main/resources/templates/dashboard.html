@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,391 +8,404 @@
   <link rel="stylesheet" href="/api/css/style.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.9.0/dist/tabler-icons.min.css" />
 </head>
+
 <body>
 
-<div class="app-shell">
+  <div class="app-shell">
 
-  <!-- TOPBAR -->
-  <header class="topbar">
-    <div class="brand">
-      <span class="dot"></span>
-      <div class="brand-text">
-        <span class="brand-name">ReferTrack</span>
-        <span class="brand-tagline">Smart Job Tracker &amp; Referral Manager</span>
-      </div>
-    </div>
-    <div class="user-info">
-      <span id="userName">—</span>
-      <div class="avatar" id="userAvatar">LB</div>
-      <button id="logoutBtn" class="btn btn-secondary btn-sm">Log out</button>
-    </div>
-  </header>
-
-  <div class="dashboard-body">
-
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-      <div class="sidebar-label">Menu</div>
-      <div class="sidebar-item active" data-tab="applications">
-        <i class="ti ti-layout-dashboard"></i><span>Dashboard</span>
-      </div>
-      <div class="sidebar-item" data-tab="applications">
-        <i class="ti ti-briefcase"></i><span>Applications</span>
-      </div>
-      <div class="sidebar-item" data-tab="network">
-        <i class="ti ti-users"></i><span>Referrals</span>
-      </div>
-      <div class="sidebar-label">Tools</div>
-      <div class="sidebar-item disabled">
-        <i class="ti ti-chart-bar"></i><span>Analytics</span>
-        <span class="coming-soon">Soon</span>
-      </div>
-      <div class="sidebar-item disabled">
-        <i class="ti ti-bell"></i><span>Reminders</span>
-        <span class="coming-soon">Soon</span>
-      </div>
-    </aside>
-
-    <!-- MAIN -->
-    <main class="main-content">
-
-      <!-- STAT CARDS -->
-      <div class="stats-row">
-        <div class="stat-card">
-          <div class="stat-value" id="totalCount">0</div>
-          <div class="stat-label">Total Saved</div>
-        </div>
-        <div class="stat-card stat-card-blue">
-          <div class="stat-value" id="appliedCount">0</div>
-          <div class="stat-label">Applied / In Progress</div>
-        </div>
-        <div class="stat-card stat-card-green">
-          <div class="stat-value" id="offerCount">0</div>
-          <div class="stat-label">Offers</div>
-        </div>
-        <div class="stat-card stat-card-referral">
-          <div class="stat-value" id="referralCount">0</div>
-          <div class="stat-label">Referrals Secured</div>
-        </div>
-        <div class="stat-card stat-card-red">
-          <div class="stat-value" id="rejectedCount">0</div>
-          <div class="stat-label">Rejected</div>
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="brand">
+        <span class="dot"></span>
+        <div class="brand-text">
+          <span class="brand-name">ReferTrack</span>
+          <span class="brand-tagline">Smart Job Tracker &amp; Referral Manager</span>
         </div>
       </div>
+      <div class="user-info">
+        <span id="userName">—</span>
+        <div class="avatar" id="userAvatar">LB</div>
+        <button id="logoutBtn" class="btn btn-secondary btn-sm">Log out</button>
+      </div>
+    </header>
 
-      <!-- CONTENT GRID -->
-      <div class="content-grid">
+    <div class="dashboard-body">
 
-        <!-- LEFT: TABS -->
-        <div class="content-left">
-          <div class="tab-bar">
-            <button class="tab-btn active" data-tab="applications">Applications</button>
-            <button class="tab-btn" data-tab="network">Referral Network</button>
+      <!-- SIDEBAR -->
+      <aside class="sidebar">
+        <div class="sidebar-label">Menu</div>
+        <div class="sidebar-item active" data-tab="applications">
+          <i class="ti ti-layout-dashboard"></i><span>Dashboard</span>
+        </div>
+        <div class="sidebar-item" data-tab="applications">
+          <i class="ti ti-briefcase"></i><span>Applications</span>
+        </div>
+        <div class="sidebar-item" data-tab="network">
+          <i class="ti ti-users"></i><span>Referrals</span>
+        </div>
+        <div class="sidebar-label">Tools</div>
+        <div class="sidebar-item disabled">
+          <i class="ti ti-chart-bar"></i><span>Analytics</span>
+          <span class="coming-soon">Soon</span>
+        </div>
+        <div class="sidebar-item disabled">
+          <i class="ti ti-bell"></i><span>Reminders</span>
+          <span class="coming-soon">Soon</span>
+        </div>
+      </aside>
+
+      <!-- MAIN -->
+      <main class="main-content">
+
+        <!-- STAT CARDS -->
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-value" id="totalCount">0</div>
+            <div class="stat-label">Total Saved</div>
           </div>
+          <div class="stat-card stat-card-blue">
+            <div class="stat-value" id="appliedCount">0</div>
+            <div class="stat-label">Applied / In Progress</div>
+          </div>
+          <div class="stat-card stat-card-green">
+            <div class="stat-value" id="offerCount">0</div>
+            <div class="stat-label">Offers</div>
+          </div>
+          <div class="stat-card stat-card-referral">
+            <div class="stat-value" id="referralCount">0</div>
+            <div class="stat-label">Referrals Secured</div>
+          </div>
+          <div class="stat-card stat-card-red">
+            <div class="stat-value" id="rejectedCount">0</div>
+            <div class="stat-label">Rejected</div>
+          </div>
+        </div>
 
-          <!-- APPLICATIONS TAB -->
-          <div id="tab-applications" class="tab-panel active">
-            <div class="section-header">
-              <div class="section-title">Your Applications</div>
-              <div class="controls">
-                <select id="referralFilter" class="select-sm">
-                  <option value="">All referrals</option>
-                  <option value="WITH">Has referral</option>
-                  <option value="NOT_REQUESTED">Not requested</option>
-                  <option value="REQUESTED">Requested</option>
-                  <option value="REFERRED">Referred</option>
-                  <option value="NO_RESPONSE">No response</option>
-                  <option value="DECLINED">Declined</option>
-                </select>
-                <select id="statusFilter" class="select-sm">
-                  <option value="">All statuses</option>
-                  <option value="SAVED">Saved</option>
-                  <option value="APPLIED">Applied</option>
-                  <option value="SCREENING">Screening</option>
-                  <option value="TECHNICAL_ROUND">Technical Round</option>
-                  <option value="HR_ROUND">HR Round</option>
-                  <option value="OFFER">Offer</option>
-                  <option value="NEGOTIATING">Negotiating</option>
-                  <option value="REJECTED">Rejected</option>
-                </select>
-                <button id="addJobBtn" class="btn btn-primary btn-sm">
-                  <i class="ti ti-plus"></i> Add Job
+        <!-- CONTENT GRID -->
+        <div class="content-grid">
+
+          <!-- LEFT: TABS -->
+          <div class="content-left">
+            <div class="tab-bar">
+              <button class="tab-btn active" data-tab="applications">Applications</button>
+              <button class="tab-btn" data-tab="network">Referral Network</button>
+            </div>
+
+            <!-- APPLICATIONS TAB -->
+            <div id="tab-applications" class="tab-panel active">
+              <div class="section-header">
+                <div class="section-title">Your Applications</div>
+                <div class="controls">
+                  <select id="referralFilter" class="select-sm">
+                    <option value="">All referrals</option>
+                    <option value="WITH">Has referral</option>
+                    <option value="NOT_REQUESTED">Not requested</option>
+                    <option value="REQUESTED">Requested</option>
+                    <option value="REFERRED">Referred</option>
+                    <option value="NO_RESPONSE">No response</option>
+                    <option value="DECLINED">Declined</option>
+                  </select>
+                  <select id="statusFilter" class="select-sm">
+                    <option value="">All statuses</option>
+                    <option value="SAVED">Saved</option>
+                    <option value="APPLIED">Applied</option>
+                    <option value="SCREENING">Screening</option>
+                    <option value="TECHNICAL_ROUND">Technical Round</option>
+                    <option value="HR_ROUND">HR Round</option>
+                    <option value="OFFER">Offer</option>
+                    <option value="NEGOTIATING">Negotiating</option>
+                    <option value="REJECTED">Rejected</option>
+                  </select>
+                  <button id="addJobBtn" class="btn btn-primary btn-sm">
+                    <i class="ti ti-plus"></i> Add Job
+                  </button>
+                </div>
+              </div>
+              <div id="jobList" class="job-grid"></div>
+            </div>
+
+            <!-- REFERRAL NETWORK TAB -->
+            <div id="tab-network" class="tab-panel">
+              <div class="section-header">
+                <div class="section-title">Referral Network</div>
+                <div class="controls">
+                  <button id="addReferralBtn" class="btn btn-primary btn-sm">
+                    <i class="ti ti-plus"></i> Add Contact
+                  </button>
+                </div>
+              </div>
+              <div class="referral-stats-row">
+                <div class="referral-stat">
+                  <div class="referral-stat-val" id="totalReferralsCount">0</div>
+                  <div class="referral-stat-lbl">Contacts</div>
+                </div>
+                <div class="referral-stat">
+                  <div class="referral-stat-val" id="totalViaReferralCount">0</div>
+                  <div class="referral-stat-lbl">Jobs via referral</div>
+                </div>
+                <div class="referral-stat">
+                  <div class="referral-stat-val" id="referralRatePercent">0%</div>
+                  <div class="referral-stat-lbl">Referral rate</div>
+                </div>
+              </div>
+              <div id="referralList" class="referral-grid"></div>
+              <div class="quick-add-referral">
+                <button id="quickAddReferralBtn" class="btn btn-secondary btn-sm">
+                  <i class="ti ti-plus"></i> Add another contact
                 </button>
               </div>
             </div>
-            <div id="jobList" class="job-grid"></div>
           </div>
 
-          <!-- REFERRAL NETWORK TAB -->
-          <div id="tab-network" class="tab-panel">
-            <div class="section-header">
-              <div class="section-title">Referral Network</div>
-              <div class="controls">
-                <button id="addReferralBtn" class="btn btn-primary btn-sm">
-                  <i class="ti ti-plus"></i> Add Contact
-                </button>
+          <!-- RIGHT SIDEBAR -->
+          <div class="content-right">
+            <div class="side-card">
+              <div class="side-card-title"><i class="ti ti-users"></i> Referral Tracker</div>
+              <div id="referralMiniList">
+                <div style="font-size:12px;color:var(--text-dim);padding:8px 0;">Loading contacts...</div>
               </div>
             </div>
-            <div class="referral-stats-row">
-              <div class="referral-stat">
-                <div class="referral-stat-val" id="totalReferralsCount">0</div>
-                <div class="referral-stat-lbl">Contacts</div>
+            <div class="side-card">
+              <div class="side-card-title"><i class="ti ti-file-upload"></i> Resume Vault</div>
+              <div id="resumeVaultList" class="resume-list"></div>
+              <div class="upload-zone" onclick="document.getElementById('quickResumeFile').click()">
+                <div class="upload-icon"><i class="ti ti-cloud-upload"></i></div>
+                <div class="upload-text">Drop your resume here</div>
+                <div class="upload-sub">PDF or DOCX · max 5 MB</div>
               </div>
-              <div class="referral-stat">
-                <div class="referral-stat-val" id="totalViaReferralCount">0</div>
-                <div class="referral-stat-lbl">Jobs via referral</div>
-              </div>
-              <div class="referral-stat">
-                <div class="referral-stat-val" id="referralRatePercent">0%</div>
-                <div class="referral-stat-lbl">Referral rate</div>
-              </div>
-            </div>
-            <div id="referralList" class="referral-grid"></div>
-            <div class="quick-add-referral">
-              <button id="quickAddReferralBtn" class="btn btn-secondary btn-sm">
-                <i class="ti ti-plus"></i> Add another contact
-              </button>
+              <input type="file" id="quickResumeFile" accept=".pdf,.doc,.docx" style="display:none;" />
+              <div id="quickUploadStatus" style="font-size:12px;margin-top:6px;min-height:16px;"></div>
             </div>
           </div>
+
         </div>
-
-        <!-- RIGHT SIDEBAR -->
-        <div class="content-right">
-          <div class="side-card">
-            <div class="side-card-title"><i class="ti ti-users"></i> Referral Tracker</div>
-            <div id="referralMiniList">
-              <div style="font-size:12px;color:var(--text-dim);padding:8px 0;">Loading contacts...</div>
-            </div>
-          </div>
-          <div class="side-card">
-            <div class="side-card-title"><i class="ti ti-file-upload"></i> Resume Vault</div>
-            <div id="resumeVaultList" class="resume-list"></div>
-            <div class="upload-zone" onclick="document.getElementById('quickResumeFile').click()">
-              <div class="upload-icon"><i class="ti ti-cloud-upload"></i></div>
-              <div class="upload-text">Drop your resume here</div>
-              <div class="upload-sub">PDF or DOCX · max 5 MB</div>
-            </div>
-            <input type="file" id="quickResumeFile" accept=".pdf,.doc,.docx" style="display:none;" />
-            <div id="quickUploadStatus" style="font-size:12px;margin-top:6px;min-height:16px;"></div>
-          </div>
-        </div>
-
-      </div>
-    </main>
+      </main>
+    </div>
   </div>
-</div>
 
-<!-- =============================================
+  <!-- =============================================
      ADD / EDIT JOB MODAL
      NOTE: All IDs here are unique — job_ prefix for
      fields that also exist in referral modal
 ============================================= -->
-<div id="modalOverlay" class="modal-overlay">
-  <div class="modal">
-    <h2 id="modalTitle">Add Job</h2>
-    <form id="jobForm">
+  <div id="modalOverlay" class="modal-overlay">
+    <div class="modal">
+      <h2 id="modalTitle">Add Job</h2>
+      <form id="jobForm">
 
-      <div class="field-row">
-        <div class="field">
-          <label for="job_company">Company *</label>
-          <input type="text" id="job_company" placeholder="e.g. Infosys" required />
-        </div>
-        <div class="field">
-          <label for="job_roleName">Role *</label>
-          <input type="text" id="job_roleName" placeholder="e.g. Java Backend Developer" required />
-        </div>
-      </div>
-
-      <div class="field">
-        <label for="job_jobUrl">Job URL</label>
-        <input type="url" id="job_jobUrl" placeholder="https://..." />
-      </div>
-
-      <div class="field-row">
-        <div class="field">
-          <label for="job_location">Location</label>
-          <input type="text" id="job_location" placeholder="Mumbai / Remote" />
-        </div>
-        <div class="field">
-          <label for="job_salary">Salary</label>
-          <input type="text" id="job_salary" placeholder="e.g. 6-8 LPA" />
-        </div>
-      </div>
-
-      <div class="field-row">
-        <div class="field">
-          <label for="job_companySize">Company size</label>
-          <input type="text" id="job_companySize" placeholder="e.g. 50-200" />
-        </div>
-        <div class="field">
-          <label for="job_deadline">Deadline</label>
-          <input type="date" id="job_deadline" />
-        </div>
-      </div>
-
-      <div class="field-row">
-        <div class="field">
-          <label for="job_jobType">Job type</label>
-          <select id="job_jobType"></select>
-        </div>
-        <div class="field">
-          <label for="job_status">Application status</label>
-          <select id="job_status"></select>
-        </div>
-      </div>
-
-      <div class="field">
-        <label for="job_jobDescription">Job description</label>
-        <textarea id="job_jobDescription" placeholder="Paste relevant parts of the JD..."></textarea>
-      </div>
-
-      <div class="field">
-        <label for="job_notes">Notes</label>
-        <textarea id="job_notes" placeholder="Interview notes, follow-ups..."></textarea>
-      </div>
-
-      <!-- RESUME SECTION — only visible inside this modal -->
-      <div class="modal-section">
-        <div class="modal-section-header">
-          <span>📄</span>
-          <h3>Resume / CV used</h3>
-        </div>
         <div class="field-row">
           <div class="field">
-            <label for="job_resumeLabel">CV label</label>
-            <input type="text" id="job_resumeLabel" placeholder="e.g. Backend-Java-CV" />
+            <label for="job_company">Company *</label>
+            <input type="text" id="job_company" placeholder="e.g. Infosys" required />
           </div>
-          <div class="field" style="max-width:110px;">
-            <label for="job_resumeVersion">Version</label>
-            <input type="text" id="job_resumeVersion" placeholder="e.g. v2" />
+          <div class="field">
+            <label for="job_roleName">Role *</label>
+            <input type="text" id="job_roleName" placeholder="e.g. Java Backend Developer" required />
           </div>
         </div>
+
         <div class="field">
-          <label>Upload CV file (PDF)</label>
-          <div class="cv-upload-row">
-            <input type="file" id="job_resumeFile" accept=".pdf,.doc,.docx" style="display:none;" />
-            <button type="button" class="btn btn-secondary btn-sm"
-              onclick="document.getElementById('job_resumeFile').click()">📎 Choose File</button>
-            <span id="job_resumeFileName" class="cv-file-name">No file chosen</span>
+          <label for="job_jobUrl">Job URL</label>
+          <input type="url" id="job_jobUrl" placeholder="https://..." />
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="job_location">Location</label>
+            <input type="text" id="job_location" placeholder="Mumbai / Remote" />
           </div>
-          <div id="job_resumeUploadStatus" class="cv-upload-status"></div>
-        </div>
-      </div>
-
-      <!-- REFERRAL SECTION — only visible inside this modal -->
-      <div class="modal-section">
-        <div class="modal-section-header">
-          <span>🤝</span>
-          <h3>Referral details</h3>
+          <div class="field">
+            <label for="job_salary">Salary</label>
+            <input type="text" id="job_salary" placeholder="e.g. 6-8 LPA" />
+          </div>
         </div>
 
-        <label class="checkbox-row">
-          <input type="checkbox" id="job_hasReferral" />
-          <span>I have (or am pursuing) a referral for this role</span>
-        </label>
+        <div class="field-row">
+          <div class="field">
+            <label for="job_companySize">Company size</label>
+            <input type="text" id="job_companySize" placeholder="e.g. 50-200" />
+          </div>
+          <div class="field">
+            <label for="job_deadline">Deadline</label>
+            <input type="date" id="job_deadline" />
+          </div>
+        </div>
 
-        <div id="job_referralFields" class="referral-fields">
+        <div class="field-row">
+          <div class="field">
+            <label for="job_jobType">Job type</label>
+            <select id="job_jobType"></select>
+          </div>
+          <div class="field">
+            <label for="job_status">Application status</label>
+            <select id="job_status"></select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="job_jobDescription">Job description</label>
+          <textarea id="job_jobDescription" placeholder="Paste relevant parts of the JD..."></textarea>
+        </div>
+
+        <div class="field">
+          <label for="job_notes">Notes</label>
+          <textarea id="job_notes" placeholder="Interview notes, follow-ups..."></textarea>
+        </div>
+
+        <!-- RESUME SECTION — only visible inside this modal -->
+        <div class="modal-section">
+          <div class="modal-section-header">
+            <span>📄</span>
+            <h3>Resume / CV used</h3>
+          </div>
           <div class="field-row">
             <div class="field">
-              <label for="job_referrerName">Referrer name</label>
-              <input type="text" id="job_referrerName" placeholder="e.g. Priya Sharma" />
+              <label for="job_resumeLabel">CV label</label>
+              <input type="text" id="job_resumeLabel" placeholder="e.g. Backend-Java-CV" />
             </div>
-            <div class="field">
-              <label for="job_referrerRelation">Relation</label>
-              <input type="text" id="job_referrerRelation" placeholder="e.g. Ex-colleague" />
-            </div>
-          </div>
-          <div class="field">
-            <label for="job_referralId">Link a saved referral contact</label>
-            <select id="job_referralId"></select>
-          </div>
-          <div class="field-row">
-            <div class="field">
-              <label for="job_referrerContact">Referrer contact</label>
-              <input type="text" id="job_referrerContact" placeholder="email / LinkedIn / phone" />
-            </div>
-            <div class="field">
-              <label for="job_referralRequestedDate">Requested on</label>
-              <input type="date" id="job_referralRequestedDate" />
+            <div class="field" style="max-width:110px;">
+              <label for="job_resumeVersion">Version</label>
+              <input type="text" id="job_resumeVersion" placeholder="e.g. v2" />
             </div>
           </div>
           <div class="field">
-            <label for="job_referralStatus">Referral status</label>
-            <select id="job_referralStatus"></select>
-          </div>
-          <div class="field">
-            <label for="job_referralNotes">Referral notes</label>
-            <textarea id="job_referralNotes" placeholder="What did they say? Any follow-up needed?"></textarea>
+            <label>Upload CV file (PDF)</label>
+            <div class="cv-upload-row">
+              <input type="file" id="job_resumeFile" accept=".pdf,.doc,.docx" style="display:none;" />
+              <button type="button" class="btn btn-secondary btn-sm"
+                onclick="document.getElementById('job_resumeFile').click()">📎 Choose File</button>
+              <span id="job_resumeFileName" class="cv-file-name">No file chosen</span>
+            </div>
+            <div id="job_resumeUploadStatus" class="cv-upload-status"></div>
           </div>
         </div>
-      </div>
 
-      <div class="modal-actions">
-        <button type="button" id="cancelBtn" class="btn btn-secondary">Cancel</button>
-        <button type="submit" id="saveBtn" class="btn btn-primary">Save</button>
-      </div>
-    </form>
+        <!-- REFERRAL SECTION — only visible inside this modal -->
+        <div class="modal-section">
+          <div class="modal-section-header">
+            <span>🤝</span>
+            <h3>Referral details</h3>
+          </div>
+
+          <label class="checkbox-row">
+            <input type="checkbox" id="job_hasReferral" />
+            <span>I have (or am pursuing) a referral for this role</span>
+          </label>
+
+          <div id="job_referralFields" class="referral-fields">
+            <div class="field-row">
+              <div class="field">
+                <label for="job_referrerName">Referrer name</label>
+                <input type="text" id="job_referrerName" placeholder="e.g. Priya Sharma" />
+              </div>
+              <div class="field">
+                <label for="job_referrerRelation">Relation</label>
+                <input type="text" id="job_referrerRelation" placeholder="e.g. Ex-colleague" />
+              </div>
+            </div>
+            <div class="field">
+              <label for="job_referralId">Link a saved referral contact</label>
+              <select id="job_referralId"></select>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label for="job_referrerContact">Referrer contact</label>
+                <input type="text" id="job_referrerContact" placeholder="email / LinkedIn / phone" />
+              </div>
+              <div class="field">
+                <label for="job_referralRequestedDate">Requested on</label>
+                <input type="date" id="job_referralRequestedDate" />
+              </div>
+            </div>
+            <div class="field">
+              <label for="job_referralStatus">Referral status</label>
+              <select id="job_referralStatus"></select>
+            </div>
+            <div class="field">
+              <label for="job_referralNotes">Referral notes</label>
+              <textarea id="job_referralNotes" placeholder="What did they say? Any follow-up needed?"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" id="cancelBtn" class="btn btn-secondary">Cancel</button>
+          <button type="submit" id="saveBtn" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
   </div>
-</div>
 
-<!-- =============================================
+  <!-- =============================================
      ADD / EDIT REFERRAL CONTACT MODAL
      NOTE: All IDs use ref_ prefix — no clashes
 ============================================= -->
-<div id="referralModalOverlay" class="modal-overlay">
-  <div class="modal">
-    <h2 id="referralModalTitle">Add Referral Contact</h2>
-    <form id="referralForm">
+  <div id="referralModalOverlay" class="modal-overlay">
+    <div class="modal">
+      <h2 id="referralModalTitle">Add Referral Contact</h2>
+      <form id="referralForm">
 
-      <div class="field">
-        <label for="ref_referrerName">Name *</label>
-        <input type="text" id="ref_referrerName" placeholder="e.g. Priya Sharma" required />
-      </div>
-
-      <div class="field-row">
         <div class="field">
-          <label for="ref_relationship">Relationship</label>
-          <select id="ref_relationship"></select>
+          <label for="ref_referrerName">Name *</label>
+          <input type="text" id="ref_referrerName" placeholder="e.g. Priya Sharma" required />
         </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="ref_relationship">Relationship</label>
+            <select id="ref_relationship"></select>
+          </div>
+          <div class="field">
+            <label for="ref_company">Company</label>
+            <input type="text" id="ref_company" placeholder="e.g. Google" />
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="ref_referrerEmail">Email</label>
+            <input type="email" id="ref_referrerEmail" placeholder="priya@company.com" />
+          </div>
+          <div class="field">
+            <label for="ref_referrerPhone">Phone</label>
+            <input type="text" id="ref_referrerPhone" placeholder="+91 98765 43210" />
+          </div>
+        </div>
+
         <div class="field">
-          <label for="ref_company">Company</label>
-          <input type="text" id="ref_company" placeholder="e.g. Google" />
+          <label for="ref_referrerLinkedinUrl">LinkedIn URL</label>
+          <input type="url" id="ref_referrerLinkedinUrl" placeholder="https://linkedin.com/in/..." />
         </div>
-      </div>
 
-      <div class="field-row">
         <div class="field">
-          <label for="ref_referrerEmail">Email</label>
-          <input type="email" id="ref_referrerEmail" placeholder="priya@company.com" />
+          <label for="ref_notes">Notes</label>
+          <textarea id="ref_notes" placeholder="How you know them, what you discussed..."></textarea>
         </div>
+
         <div class="field">
-          <label for="ref_referrerPhone">Phone</label>
-          <input type="text" id="ref_referrerPhone" placeholder="+91 98765 43210" />
+          <label for="ref_status">Referral Status</label>
+          <select id="ref_status">
+            <option value="NOT_REQUESTED">Not Requested</option>
+            <option value="REQUESTED">Requested</option>
+            <option value="REFERRED">Referred</option>
+            <option value="NO_RESPONSE">No Response</option>
+            <option value="DECLINED">Declined</option>
+          </select>
         </div>
-      </div>
 
-      <div class="field">
-        <label for="ref_referrerLinkedinUrl">LinkedIn URL</label>
-        <input type="url" id="ref_referrerLinkedinUrl" placeholder="https://linkedin.com/in/..." />
-      </div>
-
-      <div class="field">
-        <label for="ref_notes">Notes</label>
-        <textarea id="ref_notes" placeholder="How you know them, what you discussed..."></textarea>
-      </div>
-
-      <div class="modal-actions">
-        <button type="button" id="referralCancelBtn" class="btn btn-secondary">Cancel</button>
-        <button type="submit" id="referralSaveBtn" class="btn btn-primary">Save</button>
-      </div>
-    </form>
+        <div class="modal-actions">
+          <button type="button" id="referralCancelBtn" class="btn btn-secondary">Cancel</button>
+          <button type="submit" id="referralSaveBtn" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
   </div>
-</div>
 
-<div id="toast"></div>
+  <div id="toast"></div>
 
-<script src="/api/js/common.js"></script>
-<script src="/api/js/referral.js"></script>
-<script src="/api/js/jobs.js"></script>
+  <script src="/api/js/common.js"></script>
+  <script src="/api/js/referral.js"></script>
+  <script src="/api/js/jobs.js"></script>
 </body>
+
 </html>

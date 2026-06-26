@@ -23,54 +23,59 @@ import com.job.tracker.security.JwtAuthenticationFilter;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Autowired
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
+        @Autowired
+        private JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+                return new BCryptPasswordEncoder();
+        }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList(
-                "http://localhost:8080",   // ← your actual app origin
-                "http://localhost:3000",
-                "http://localhost:5173",
-                "http://localhost:4200"
-        ));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setAllowCredentials(true);
+        @Bean
+        public CorsConfigurationSource corsConfigurationSource() {
+                CorsConfiguration configuration = new CorsConfiguration();
+                configuration.setAllowedOrigins(Arrays.asList(
+                                "http://localhost:3000",
+                                "http://localhost:5173",
+                                "http://localhost:8080",
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
+                                "http://localhost:4200"));
+                configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+                configuration.setAllowedHeaders(Arrays.asList("*"));
+                configuration.setAllowCredentials(true);
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .cors(Customizer.withDefaults())
-                .csrf(csrf -> csrf.disable())
-                .sessionManagement(management -> management
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(authz -> authz
-                        .requestMatchers(
-                                "/auth/signup",
-                                "/auth/login",
-                                "/",
-                                "/login-page",
-                                "/signup-page",
-                                "/dashboard",
-                                "/js/**",
-                                "/css/**",
-                                "/images/**"
-                        ).permitAll()
-                        .anyRequest().authenticated())
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+                source.registerCorsConfiguration("/**", configuration);
+                return source;
+        }
 
-        return http.build();
-    }
+        @Bean
+        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+                http
+                                // ✅ FIXED: Use Spring's built-in Customizer.withDefaults() — NOT a custom
+                                // method
+                                .cors(Customizer.withDefaults())
+                                .csrf(csrf -> csrf.disable())
+                                .sessionManagement(management -> management
+                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                .authorizeHttpRequests(authz -> authz
+                                                .requestMatchers(
+                                                                "/auth/signup",
+                                                                "/auth/login",
+                                                                "/",
+                                                                "/login-page",
+                                                                "/signup-page",
+                                                                "/dashboard",
+                                                                "/js/**",
+                                                                "/css/**",
+                                                                "/images/**",
+                                                                "/resumes/*/view"
+                                                ).permitAll()
+                                                .anyRequest().authenticated())
+                                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+                return http.build();
+        }
+
+        // ✅ REMOVED the broken private withDefaults() method entirely
 }

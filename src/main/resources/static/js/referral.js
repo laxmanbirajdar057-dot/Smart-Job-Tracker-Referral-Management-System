@@ -82,10 +82,10 @@ async function loadReferrals() {
 async function loadReferralStats() {
   try {
     const stats = await apiFetch("/referrals/stats");
-    document.getElementById("totalReferralsCount").textContent  = stats.totalReferrals ?? 0;
+    document.getElementById("totalReferralsCount").textContent = stats.totalReferrals ?? 0;
     document.getElementById("totalViaReferralCount").textContent = stats.totalApplicationsViaReferral ?? 0;
     const rate = typeof stats.referralRatePercent === "number" ? stats.referralRatePercent : 0;
-    document.getElementById("referralRatePercent").textContent   = `${Math.round(rate)}%`;
+    document.getElementById("referralRatePercent").textContent = `${Math.round(rate)}%`;
   } catch (err) {
     console.error("Failed to load referral stats", err);
   }
@@ -120,11 +120,15 @@ function renderReferralNetwork(referrals) {
           </div>
         </div>
         <div class="referral-meta">
-          ${ref.company          ? `<span>🏢 ${escapeHtml(ref.company)}</span>` : ""}
-          ${ref.referrerEmail    ? `<span>✉️ ${escapeHtml(ref.referrerEmail)}</span>` : ""}
-          ${ref.referrerPhone    ? `<span>📞 ${escapeHtml(ref.referrerPhone)}</span>` : ""}
+          ${ref.company ? `<span>🏢 ${escapeHtml(ref.company)}</span>` : ""}
+          ${ref.referrerEmail ? `<span>✉️ ${escapeHtml(ref.referrerEmail)}</span>` : ""}
+          ${ref.referrerPhone ? `<span>📞 ${escapeHtml(ref.referrerPhone)}</span>` : ""}
           ${ref.referrerLinkedinUrl ? `<span>🔗 <a href="${escapeHtml(ref.referrerLinkedinUrl)}" target="_blank" rel="noopener">LinkedIn</a></span>` : ""}
         </div>
+        <span class="referral-status-badge ref-status-${(ref.status || "NOT_REQUESTED").toLowerCase().replace(/_/g, "-")}">
+  ${formatLabel(ref.status || "NOT_REQUESTED")}
+</span>
+<span class="referral-job-count">${ref.referredJobCount || 0} job${ref.referredJobCount === 1 ? "" : "s"} linked</span>
         <span class="referral-job-count">${ref.referredJobCount || 0} job${ref.referredJobCount === 1 ? "" : "s"} linked</span>
         <div class="referral-card-actions">
           <button class="btn btn-secondary btn-sm" onclick="openReferralModal(${ref.id})">Edit</button>
@@ -146,17 +150,17 @@ function renderReferralMiniList(referrals) {
   }
 
   const STATUS_MAP = {
-    REQUESTED:     { cls: "dot-yellow", label: "Requested",   color: "#854F0B" },
-    REFERRED:      { cls: "dot-green",  label: "Secured",     color: "#0F6E56" },
-    NO_RESPONSE:   { cls: "dot-gray",   label: "No response", color: "#888780" },
-    DECLINED:      { cls: "dot-red",    label: "Declined",    color: "#A32D2D" },
-    NOT_REQUESTED: { cls: "dot-gray",   label: "Pending",     color: "#888780" },
+    REQUESTED: { cls: "dot-yellow", label: "Requested", color: "#854F0B" },
+    REFERRED: { cls: "dot-green", label: "Secured", color: "#0F6E56" },
+    NO_RESPONSE: { cls: "dot-gray", label: "No response", color: "#888780" },
+    DECLINED: { cls: "dot-red", label: "Declined", color: "#A32D2D" },
+    NOT_REQUESTED: { cls: "dot-gray", label: "Pending", color: "#888780" },
   };
 
   container.innerHTML = referrals.slice(0, 5).map((ref) => {
     const initials = (ref.referrerName || "?")
       .split(" ").map((p) => p[0]).filter(Boolean).slice(0, 2).join("").toUpperCase();
-    const s = STATUS_MAP[ref.latestReferralStatus || "NOT_REQUESTED"] || STATUS_MAP.NOT_REQUESTED;
+    const s = STATUS_MAP[ref.status || "NOT_REQUESTED"] || STATUS_MAP.NOT_REQUESTED;
 
     return `
       <div class="ref-mini-item">
@@ -192,13 +196,17 @@ function openReferralModal(referralId = null) {
   if (referralId) {
     const ref = allReferrals.find((r) => r.id === referralId);
     if (ref) {
-      document.getElementById("ref_referrerName").value        = ref.referrerName || "";
-      document.getElementById("ref_relationship").value        = ref.relationship || "";
-      document.getElementById("ref_company").value             = ref.company || "";
-      document.getElementById("ref_referrerEmail").value       = ref.referrerEmail || "";
-      document.getElementById("ref_referrerPhone").value       = ref.referrerPhone || "";
+      document.getElementById("ref_referrerName").value = ref.referrerName || "";
+      document.getElementById("ref_relationship").value = ref.relationship || "";
+      document.getElementById("ref_company").value = ref.company || "";
+      document.getElementById("ref_referrerEmail").value = ref.referrerEmail || "";
+      document.getElementById("ref_referrerPhone").value = ref.referrerPhone || "";
       document.getElementById("ref_referrerLinkedinUrl").value = ref.referrerLinkedinUrl || "";
-      document.getElementById("ref_notes").value               = ref.notes || "";
+      document.getElementById("ref_notes").value = ref.notes || "";
+
+      document.getElementById("ref_status").value = ref.status || "NOT_REQUESTED";
+
+
     }
   }
 
@@ -215,13 +223,14 @@ async function handleSaveReferral(event) {
   const saveBtn = document.getElementById("referralSaveBtn");
 
   const payload = {
-    referrerName:        document.getElementById("ref_referrerName").value.trim(),
-    relationship:        document.getElementById("ref_relationship").value || null,
-    company:             document.getElementById("ref_company").value.trim() || null,
-    referrerEmail:       document.getElementById("ref_referrerEmail").value.trim() || null,
-    referrerPhone:       document.getElementById("ref_referrerPhone").value.trim() || null,
+    referrerName: document.getElementById("ref_referrerName").value.trim(),
+    relationship: document.getElementById("ref_relationship").value || null,
+    company: document.getElementById("ref_company").value.trim() || null,
+    referrerEmail: document.getElementById("ref_referrerEmail").value.trim() || null,
+    referrerPhone: document.getElementById("ref_referrerPhone").value.trim() || null,
     referrerLinkedinUrl: document.getElementById("ref_referrerLinkedinUrl").value.trim() || null,
-    notes:               document.getElementById("ref_notes").value.trim() || null,
+    notes: document.getElementById("ref_notes").value.trim() || null,
+    status: document.getElementById("ref_status").value || "NOT_REQUESTED", // ✅
   };
 
   if (!payload.referrerName) {
@@ -292,7 +301,7 @@ async function loadSidebarResumes() {
           <div class="resume-file-meta">${r.cvFileName ? escapeHtml(r.cvFileName) : ""}${r.version ? ` · ${escapeHtml(r.version)}` : ""}</div>
         </div>
         <div class="resume-file-actions">
-          <a href="/api/resumes/${r.id}/download" class="btn btn-secondary btn-sm" title="Download">⬇</a>
+<button class="btn btn-secondary btn-sm" onclick="viewResume(${r.id})" title="View">⬇</button>
         </div>
       </div>`).join("");
   } catch (err) {
