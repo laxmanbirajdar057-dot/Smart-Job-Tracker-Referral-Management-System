@@ -30,7 +30,7 @@ server:
     context-path: /api
 
 jwt:
-  secret: ${JWT_SECRET}
+  secret: 5312e4b78ac7414b28e8926936c37e70c783eb0920f23c6ccc5dc52dd794ab74
   expiration: 86400000
 
 logging:
