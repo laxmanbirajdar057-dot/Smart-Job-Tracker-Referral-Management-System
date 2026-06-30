@@ -2,11 +2,19 @@ package com.job.tracker.dto;
 
 import java.time.LocalDate;
 import java.util.List;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 public class JobDTO {
 
     public static class CreateJobRequest {
+
+        @NotBlank(message = "Company name is required")
+        @Size(max = 150, message = "Company name must be under 150 characters")
         private String company;
+
+        @NotBlank(message = "Role name is required")
+        @Size(max = 150, message = "Role name must be under 150 characters")
         private String roleName;
         private String jobUrl;
         private String jobDescription;

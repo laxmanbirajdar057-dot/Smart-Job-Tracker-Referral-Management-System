@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.job.tracker.dto.JobDTO.CreateJobRequest;
 import com.job.tracker.dto.JobDTO.JobListResponse;
@@ -15,6 +16,8 @@ import com.job.tracker.entity.Job;
 import com.job.tracker.entity.Referral;
 import com.job.tracker.entity.Resume;
 import com.job.tracker.entity.User;
+import com.job.tracker.exception.DuplicateJobException;
+import com.job.tracker.exception.ResourceNotFoundException;
 import com.job.tracker.repository.JobRepository;
 import com.job.tracker.repository.ReferralRepository;
 import com.job.tracker.repository.ResumeRepository;
@@ -37,10 +40,18 @@ public class JobService {
 
     private static final DateTimeFormatter TIMESTAMP_FORMAT = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
+    @Transactional
     public JobResponse createJob(Long userId, CreateJobRequest request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
+        // ===== DUPLICATE DETECTION =====
+        jobRepository.findByUserIdAndCompanyIgnoreCaseAndRoleNameIgnoreCase(
+                userId, request.getCompany(), request.getRoleName()).ifPresent(existing -> {
+                    throw new DuplicateJobException(
+                            "You've already applied to " + request.getCompany() +
+                                    " for the role of " + request.getRoleName());
+                });
         Job job = new Job();
         job.setUser(user);
         job.setCompany(request.getCompany());
@@ -69,7 +80,7 @@ public class JobService {
         }
         if (request.getResumeId() != null) {
             Resume resume = resumeRepository.findByIdAndUserId(request.getResumeId(), userId)
-                    .orElseThrow(() -> new RuntimeException("Resume not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Resume not found"));
             job.setResume(resume);
         }
 
@@ -102,9 +113,10 @@ public class JobService {
         return response;
     }
 
+    @Transactional
     public JobResponse updateJob(Long id, Long userId, UpdateJobRequest request) {
         Job job = jobRepository.findByIdAndUserId(id, userId)
-                .orElseThrow(() -> new RuntimeException("Job not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Job not found"));
 
         if (request.getCompany() != null)
             job.setCompany(request.getCompany());
@@ -123,7 +135,7 @@ public class JobService {
 
         if (request.getLocation() != null)
             job.setLocation(request.getLocation());
-        
+
         if (request.getSalary() != null)
             job.setSalary(request.getSalary());
 
@@ -156,7 +168,7 @@ public class JobService {
 
         if (request.getResumeId() != null) {
             Resume resume = resumeRepository.findByIdAndUserId(request.getResumeId(), userId)
-                    .orElseThrow(() -> new RuntimeException("Resume not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Resume not found"));
             job.setResume(resume);
         }
         if (request.isReferralIdSet()) {
@@ -182,7 +194,7 @@ public class JobService {
 
     public void deleteJob(Long id, Long userId) {
         Job job = jobRepository.findByIdAndUserId(id, userId)
-                .orElseThrow(() -> new RuntimeException("Job not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Job not found"));
         jobRepository.delete(job);
     }
 
@@ -192,7 +204,7 @@ public class JobService {
 
     public JobResponse getJob(Long id, Long userId) {
         Job job = jobRepository.findByIdAndUserId(id, userId)
-                .orElseThrow(() -> new RuntimeException("Job not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Job not found"));
         return toJobResponse(job);
     }
 
@@ -220,7 +232,7 @@ public class JobService {
 
     private Referral resolveReferral(Long referralId, Long userId) {
         return referralRepository.findByIdAndUserId(referralId, userId)
-                .orElseThrow(() -> new RuntimeException("Referral not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Referral not found"));
     }
 
     private JobResponse toJobResponse(Job job) {

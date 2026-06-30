@@ -1,6 +1,5 @@
 package com.job.tracker.controller;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -13,23 +12,26 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.job.tracker.dto.JobDTO;
 import com.job.tracker.service.JobService;
-
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+
 
 @RestController
 @RequestMapping("/jobs")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173"})
+@CrossOrigin(origins = { "http://localhost:3000", "http://localhost:5173" })
 public class JobController {
 
-    @Autowired
-    private JobService jobService;
+    private final JobService jobService;
+
+    public JobController(JobService jobService) {
+        this.jobService = jobService;
+    }
 
     @PostMapping
     public ResponseEntity<JobDTO.JobResponse> createJob(
-            @RequestBody JobDTO.CreateJobRequest request,
+            @Valid @RequestBody JobDTO.CreateJobRequest request,
             HttpServletRequest httpRequest) {
         Long userId = (Long) httpRequest.getAttribute("userId");
         if (userId == null) {

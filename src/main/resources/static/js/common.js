@@ -23,12 +23,12 @@ const Auth = {
   isLoggedIn() {
     return !!this.getToken();
   },
-  
+
   logout() {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     window.location.href = "/api/login-page";
-},
+  },
 };
 
 // Central fetch wrapper: attaches the Authorization header, parses JSON,
@@ -65,10 +65,16 @@ async function apiFetch(path, options = {}) {
   }
 
   if (!response.ok) {
-    const message =
+    let message =
       (data && typeof data === "object" && data.message) ||
       (typeof data === "string" && data) ||
       `Request failed (${response.status})`;
+
+    // Surface field-level validation errors if present (400 from @Valid)
+    if (data && typeof data === "object" && data.errors) {
+      const fieldMessages = Object.values(data.errors).join(", ");
+      if (fieldMessages) message = fieldMessages;
+    }
 
     if (response.status === 401) {
       // Token missing/expired/invalid — kick back to login.
