@@ -65,7 +65,7 @@ public CorsConfigurationSource corsConfigurationSource() {
         "/login-page",      // ← add back
         "/signup-page",     // ← add back
         "/dashboard",       // ← add back
-        "/js/**",           // ← static files
+        "/api/js/**",           // ← static files
         "/css/**",
         "/images/**"
     ).permitAll()

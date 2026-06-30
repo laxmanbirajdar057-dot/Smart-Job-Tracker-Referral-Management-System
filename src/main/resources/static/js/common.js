@@ -1,7 +1,7 @@
 // Shared helpers: API base, token storage, fetch wrapper, toast notifications.
 // Loaded before auth.js / jobs.js on every page.
 
-const API_BASE = "/api";
+const API_BASE = "";
 
 const Auth = {
   getToken() {
