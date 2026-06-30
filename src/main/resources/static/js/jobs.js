@@ -13,7 +13,7 @@ let editingJobId = null;
 
 document.addEventListener("DOMContentLoaded", () => {
   if (!Auth.isLoggedIn()) {
-    window.location.href = "/api/login-page";
+    window.location.href = "/login-page";
     return;
   }
 

@@ -4,7 +4,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   // If already logged in, skip straight to the dashboard.
   if (Auth.isLoggedIn()) {
-    window.location.href = "/api/dashboard";
+    window.location.href = "/dashboard";
     return;
   }
 
@@ -48,7 +48,7 @@ async function handleLogin(event) {
       lastName: data.lastName,
     });
 
-    window.location.href = "/api/dashboard";
+    window.location.href = "/dashboard";
   } catch (err) {
     showError("errorBanner", err.message || "Login failed. Check your credentials.");
   } finally {
@@ -101,7 +101,7 @@ async function handleSignup(event) {
       lastName: data.lastName,
     });
 
-    window.location.href = "/api/dashboard";
+    window.location.href = "/dashboard";
   } catch (err) {
     showError("errorBanner", err.message || "Signup failed. Please try again.");
   } finally {
