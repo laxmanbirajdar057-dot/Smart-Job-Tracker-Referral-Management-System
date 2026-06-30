@@ -52,8 +52,6 @@ public class SecurityConfig {
         @Bean
         public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
                 http
-                                // ✅ FIXED: Use Spring's built-in Customizer.withDefaults() — NOT a custom
-                                // method
                                 .cors(Customizer.withDefaults())
                                 .csrf(csrf -> csrf.disable())
                                 .sessionManagement(management -> management
@@ -66,6 +64,8 @@ public class SecurityConfig {
                                                                 "/health")
                                                 .permitAll()
                                                 .anyRequest().authenticated())
+                                .formLogin(form -> form.disable()) // ← add this
+                                .httpBasic(basic -> basic.disable()) // ← add this
                                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
                 return http.build();
