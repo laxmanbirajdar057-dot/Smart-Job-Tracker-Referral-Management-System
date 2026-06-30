@@ -15,7 +15,7 @@ import com.job.tracker.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("auth")
 @CrossOrigin(origins = { "http://localhost:3000", "http://localhost:5173" })
 
 public class AuthController {
