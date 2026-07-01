@@ -35,7 +35,7 @@ async function handleLogin(event) {
   setButtonLoading(submitBtn, true, "Logging in...");
 
   try {
-    const data = await apiFetch("/auth/api/login", {
+    const data = await apiFetch("/auth/login", {
       method: "POST",
       body: JSON.stringify({ email, password }),
     });
@@ -81,7 +81,7 @@ async function handleSignup(event) {
   setButtonLoading(submitBtn, true, "Creating account...");
 
   try {
-    const data = await apiFetch("/auth/api/signup", {
+    const data = await apiFetch("/auth/signup", {
       method: "POST",
       body: JSON.stringify({
         email,
