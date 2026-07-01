@@ -288,7 +288,7 @@ async function loadSidebarResumes() {
   if (!container) return;
   try {
     const token = Auth.getToken();
-    const res = await fetch("/resumes", {
+    const res = await fetch("/api/resumes", {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) { container.innerHTML = ""; return; }
@@ -316,7 +316,7 @@ async function handleDeleteResume(resumeId) {
   if (!confirm("Delete this resume? This cannot be undone.")) return;
   try {
     const token = Auth.getToken();
-    const res = await fetch(`/resumes/${resumeId}`, {
+    const res = await fetch(`/api/resumes/${resumeId}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -339,7 +339,7 @@ async function handleQuickResumeUpload(e) {
     formData.append("file", file);
     formData.append("label", file.name.replace(/\.[^.]+$/, ""));
     const token = Auth.getToken();
-    const res = await fetch("/resumes/upload", {
+    const res = await fetch("/api/resumes/upload", {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
       body: formData,
