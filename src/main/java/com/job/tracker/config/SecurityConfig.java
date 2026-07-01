@@ -63,6 +63,7 @@ public class SecurityConfig {
                                                                 "/auth/**",
                                                                 "/resumes/*/view",
                                                                 "/",
+                                                                "error",
                                                                 "/login-page", // ← add back
                                                                 "/signup-page", // ← add back
                                                                 "/dashboard", // ← add back

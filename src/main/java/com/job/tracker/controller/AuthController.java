@@ -2,7 +2,6 @@ package com.job.tracker.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,7 +15,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("auth")
-@CrossOrigin(origins = { "http://localhost:3000", "http://localhost:5173" })
+// @CrossOrigin(origins = { "http://localhost:3000", "http://localhost:5173" })
 
 public class AuthController {
 
@@ -25,19 +24,19 @@ public class AuthController {
 
     
 
-    @PostMapping("/api/signup")
+    @PostMapping("/signup")
     public ResponseEntity<AuthDTO.AuthResponse> signup(@RequestBody AuthDTO.SignUpRequest request) {
         AuthDTO.AuthResponse response = userService.signup(request);
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/api/login")
+    @PostMapping("/login")
     public ResponseEntity<AuthDTO.AuthResponse> login(@RequestBody AuthDTO.LoginRequest request) {
         AuthDTO.AuthResponse response = userService.login(request);
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/api/profile")
+    @GetMapping("/profile")
     public ResponseEntity<AuthDTO.UserProfile> getProfile(HttpServletRequest request) {
         Long userId = (Long) request.getAttribute("userId");
         if (userId == null) {
@@ -47,7 +46,7 @@ public class AuthController {
         return ResponseEntity.ok(profile);
     }
 
-    @GetMapping("/api/verify")
+    @GetMapping("/verify")
     public ResponseEntity<Boolean> verifyToken(HttpServletRequest request) {
         Long userId = (Long) request.getAttribute("userId");
         return ResponseEntity.ok(userId != null);
