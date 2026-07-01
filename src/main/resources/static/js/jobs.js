@@ -88,7 +88,7 @@ function viewResume(resumeId) {
     showToast("You are not logged in.", "error");
     return;
   }
-  const url = `/resumes/${resumeId}/view?token=${encodeURIComponent(token)}`;
+  const url = `/api/resumes/${resumeId}/view?token=${encodeURIComponent(token)}`;
   window.open(url, "_blank");
 }
 
