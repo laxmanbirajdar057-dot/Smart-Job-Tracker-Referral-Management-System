@@ -16,9 +16,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.job.tracker.dto.AtsCheckDTO;
 import com.job.tracker.dto.ResumeDTO.ResumeResponse;
 import com.job.tracker.entity.Resume;
 import com.job.tracker.security.JwtTokenProvider;
+import com.job.tracker.service.AtsCheckerService;
 import com.job.tracker.service.ResumeService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,6 +34,9 @@ public class ResumeController {
 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
+
+    @Autowired
+    private AtsCheckerService atsCheckerService;
 
     // ✅ REMOVED JwtTokenProvider — no longer needed
 
@@ -100,6 +105,15 @@ public class ResumeController {
                         "inline; filename=\"" + resume.getCvFileName() + "\"")
                 .contentType(MediaType.parseMediaType(resume.getCvFileType()))
                 .body(resume.getCvFile());
+    }
+
+    // ===== SMART FEATURE: ATS CHECKER =====
+    @GetMapping("/{id}/ats-check")
+    public ResponseEntity<AtsCheckDTO.Response> atsCheck(@PathVariable Long id, HttpServletRequest request) {
+        Long userId = getUserId(request);
+        if (userId == null)
+            return ResponseEntity.status(401).build();
+        return ResponseEntity.ok(atsCheckerService.checkResume(id, userId));
     }
 
     // ✅ Now reads from filter-set attribute, same as

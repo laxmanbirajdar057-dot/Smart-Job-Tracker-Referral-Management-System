@@ -1,13 +1,17 @@
 package com.job.tracker.service;
 
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.job.tracker.dto.AnalyticsDTO;
 import com.job.tracker.dto.JobDTO.CreateJobRequest;
 import com.job.tracker.dto.JobDTO.JobListResponse;
 import com.job.tracker.dto.JobDTO.JobResponse;
@@ -278,5 +282,72 @@ public class JobService {
         }
 
         return response;
+    }
+
+    public JobListResponse getJobsNeedingFollowUp(Long userId) {
+        List<Job> jobs = jobRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        LocalDate today = LocalDate.now();
+
+        List<JobResponse> followUps = jobs.stream()
+                .filter(job -> needsFollowUp(job, today))
+                .map(this::toJobResponse)
+                .collect(Collectors.toList());
+
+        JobListResponse response = new JobListResponse();
+        response.setData(followUps);
+        response.setTotalCount(followUps.size());
+        return response;
+    }
+
+    public AnalyticsDTO.Response getAnalytics(Long userId) {
+        List<Job> jobs = jobRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        long totalApplications = jobs.size();
+
+        Map<String, Long> countByStatus = jobs.stream()
+                .collect(Collectors.groupingBy(
+                        job -> job.getStatus() != null ? job.getStatus().name() : "UNKNOWN",
+                        Collectors.counting()));
+
+        long referredCount = jobs.stream()
+                .filter(job -> job.isHasReferral() || job.getReferral() != null)
+                .count();
+        long nonReferredCount = totalApplications - referredCount;
+
+        long referredOffers = jobs.stream()
+                .filter(job -> job.getStatus() == Job.ApplicationStatus.OFFER)
+                .filter(job -> job.isHasReferral() || job.getReferral() != null)
+                .count();
+        long nonReferredOffers = jobs.stream()
+                .filter(job -> job.getStatus() == Job.ApplicationStatus.OFFER)
+                .filter(job -> !(job.isHasReferral() || job.getReferral() != null))
+                .count();
+
+        double referralOfferRate = referredCount == 0 ? 0.0 : (referredOffers * 100.0) / referredCount;
+        double nonReferralOfferRate = nonReferredCount == 0 ? 0.0 : (nonReferredOffers * 100.0) / nonReferredCount;
+
+        return new AnalyticsDTO.Response(
+                totalApplications,
+                countByStatus,
+                referralOfferRate,
+                nonReferralOfferRate,
+                referredCount,
+                nonReferredCount);
+    }
+
+    private boolean needsFollowUp(Job job, LocalDate today) {
+        if (job == null || job.getStatus() == null) {
+            return false;
+        }
+        if (job.getStatus() == Job.ApplicationStatus.OFFER || job.getStatus() == Job.ApplicationStatus.REJECTED) {
+            return false;
+        }
+        if (job.getUpdatedAt() != null && ChronoUnit.DAYS.between(job.getUpdatedAt().toLocalDate(), today) >= 7) {
+            return true;
+        }
+        if (job.getDeadline() != null) {
+            long daysUntilDeadline = ChronoUnit.DAYS.between(today, job.getDeadline());
+            return daysUntilDeadline >= 0 && daysUntilDeadline <= 3;
+        }
+        return false;
     }
 }

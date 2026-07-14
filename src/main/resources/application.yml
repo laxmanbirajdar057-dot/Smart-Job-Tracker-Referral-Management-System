@@ -1,9 +1,9 @@
 
 spring:
   datasource:
-    url: jdbc:mysql://${MYSQLHOST}:${MYSQLPORT}/${MYSQLDATABASE}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-    username: ${MYSQLUSER}
-    password: ${MYSQLPASSWORD}
+    url: jdbc:mysql://localhost:3306/job_tracker?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root 
+    password: Laxman@123
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   servlet:
@@ -30,6 +30,11 @@ server:
 jwt:
   secret: 5312e4b78ac7414b28e8926936c37e70c783eb0920f23c6ccc5dc52dd794ab74
   expiration: 86400000
+
+gemini:
+  api-key: " YOUR_API_KEY" 
+  model: gemini-2.5-flash
+  base-url: https://generativelanguage.googleapis.com/v1beta/models
 
 logging:
   level:
