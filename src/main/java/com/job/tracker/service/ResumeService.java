@@ -51,6 +51,7 @@ public class ResumeService {
                 .orElseThrow(() -> new RuntimeException("Resume not found"));
     }
 
+    @org.springframework.cache.annotation.CacheEvict(value = "aiFeedback", allEntries = true)
     public void deleteResume(Long id, Long userId) {
         Resume resume = resumeRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new RuntimeException("Resume not found"));

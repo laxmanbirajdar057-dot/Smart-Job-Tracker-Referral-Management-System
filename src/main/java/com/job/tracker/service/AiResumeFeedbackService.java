@@ -1,5 +1,12 @@
 package com.job.tracker.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.job.tracker.dto.AiFeedbackDTO;
@@ -7,20 +14,7 @@ import com.job.tracker.entity.Job;
 import com.job.tracker.entity.Resume;
 import com.job.tracker.exception.ResourceNotFoundException;
 import com.job.tracker.repository.JobRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-
-/**
- * SMART FEATURE: AI RESUME FEEDBACK.
- *
- * Unlike MatchScoreService (plain keyword overlap), this asks an LLM to
- * actually reason about fit: what's genuinely strong, what's missing, and
- * concrete rewording suggestions — the kind of qualitative judgment a
- * keyword whitelist can't produce.
- */
 @Service
 public class AiResumeFeedbackService {
 
@@ -31,13 +25,14 @@ public class AiResumeFeedbackService {
     private ResumeService resumeService;
 
     @Autowired
-    private  ResumeTextExtractor textExtractor;
+    private ResumeTextExtractor textExtractor;
 
     @Autowired
     private GeminiClientService geminiClient;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    @Cacheable(value = "aiFeedback", key = "#jobId + '-' + #resumeId + '-' + #userId")
     public AiFeedbackDTO.Response getFeedback(Long jobId, Long resumeId, Long userId) {
 
         Job job = jobRepository.findByIdAndUserId(jobId, userId)
@@ -52,13 +47,17 @@ public class AiResumeFeedbackService {
                     "No resume linked to this job — pass ?resumeId= or attach a resume to the job first");
         }
 
-        String resumeText = textExtractor.extractText(resume.getCvFile());
-        String jobDescription = job.getJobDescription() == null ? "" : job.getJobDescription();
+        String resumeText = truncate(textExtractor.extractText(resume.getCvFile()), 6000);
+        String jobDescription = truncate(job.getJobDescription() == null ? "" : job.getJobDescription(), 4000);
 
         String prompt = buildPrompt(job.getCompany(), job.getRoleName(), jobDescription, resumeText);
 
-        String rawReply = geminiClient.complete(prompt, 800);
+        String rawReply = geminiClient.completeJson(prompt, 2048);
         return parseResponse(rawReply);
+    }
+
+    private String truncate(String text, int maxChars) {
+        return text.length() > maxChars ? text.substring(0, maxChars) : text;
     }
 
     private String buildPrompt(String company, String roleName, String jobDescription, String resumeText) {
@@ -88,7 +87,6 @@ public class AiResumeFeedbackService {
 
     private AiFeedbackDTO.Response parseResponse(String rawReply) {
         try {
-            // Gemini sometimes wraps JSON in code fences despite instructions — strip them defensively
             String cleaned = rawReply.replaceAll("```json|```", "").trim();
             JsonNode node = objectMapper.readTree(cleaned);
 
@@ -99,12 +97,14 @@ public class AiResumeFeedbackService {
             response.setSuggestions(toList(node.path("suggestions")));
             return response;
         } catch (Exception e) {
-            // Fallback: surface the raw text rather than failing the whole request
+            boolean looksTruncated = !rawReply.trim().endsWith("}");
             AiFeedbackDTO.Response response = new AiFeedbackDTO.Response();
-            response.setOverallImpression(rawReply);
+            response.setOverallImpression(looksTruncated
+                    ? "AI response was cut off before finishing (hit the token limit) — showing partial output below."
+                    : "Couldn't parse a structured response — showing raw AI output below.");
             response.setStrengths(List.of());
             response.setGaps(List.of());
-            response.setSuggestions(List.of());
+            response.setSuggestions(List.of(rawReply));
             return response;
         }
     }

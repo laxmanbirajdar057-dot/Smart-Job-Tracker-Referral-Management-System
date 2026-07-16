@@ -118,6 +118,8 @@ public class JobService {
     }
 
     @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = "aiFeedback", allEntries = true)
+
     public JobResponse updateJob(Long id, Long userId, UpdateJobRequest request) {
         Job job = jobRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Job not found"));
@@ -196,6 +198,7 @@ public class JobService {
         return toJobResponse(job);
     }
 
+    @org.springframework.cache.annotation.CacheEvict(value = "aiFeedback", allEntries = true)
     public void deleteJob(Long id, Long userId) {
         Job job = jobRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Job not found"));

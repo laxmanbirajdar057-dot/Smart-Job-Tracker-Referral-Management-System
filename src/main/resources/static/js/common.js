@@ -76,7 +76,7 @@ async function apiFetch(path, options = {}) {
       if (fieldMessages) message = fieldMessages;
     }
 
-    if (response.status === 401) {
+    if (response.status === 401 || response.status === 403) {
       // Token missing/expired/invalid — kick back to login.
       Auth.logout();
     }

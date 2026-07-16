@@ -11,13 +11,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.job.tracker.dto.AiFeedbackDTO;
+import com.job.tracker.dto.AnalyticsDTO;
+import com.job.tracker.dto.AtsCheckDTO;
 import com.job.tracker.dto.JobDTO;
 import com.job.tracker.dto.MatchScoreDTO;
-import com.job.tracker.dto.AnalyticsDTO;
-import com.job.tracker.dto.AiFeedbackDTO;
+import com.job.tracker.service.AiResumeFeedbackService;
+import com.job.tracker.service.AtsCheckerService;
 import com.job.tracker.service.JobService;
 import com.job.tracker.service.MatchScoreService;
-import com.job.tracker.service.AiResumeFeedbackService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -30,12 +32,15 @@ public class JobController {
     private final JobService jobService;
     private final MatchScoreService matchScoreService;
     private final AiResumeFeedbackService aiResumeFeedbackService;
+    private final AtsCheckerService atsCheckerService;
 
     public JobController(JobService jobService, MatchScoreService matchScoreService,
-                          AiResumeFeedbackService aiResumeFeedbackService) {
+                          AiResumeFeedbackService aiResumeFeedbackService,
+                          AtsCheckerService atsCheckerService) {
         this.jobService = jobService;
         this.matchScoreService = matchScoreService;
         this.aiResumeFeedbackService = aiResumeFeedbackService;
+        this.atsCheckerService = atsCheckerService;
     }
 
     @PostMapping
@@ -154,6 +159,19 @@ public class JobController {
             return ResponseEntity.status(401).build();
         }
         return ResponseEntity.ok(aiResumeFeedbackService.getFeedback(jobId, resumeId, userId));
+    }
+
+    // ===== SMART FEATURE: ATS CHECK (job/JD-aware) =====
+    @GetMapping("/{jobId}/ats-check")
+    public ResponseEntity<AtsCheckDTO.Response> getAtsCheck(
+            @PathVariable Long jobId,
+            @RequestParam(required = false) Long resumeId,
+            HttpServletRequest request) {
+        Long userId = (Long) request.getAttribute("userId");
+        if (userId == null) {
+            return ResponseEntity.status(401).build();
+        }
+        return ResponseEntity.ok(atsCheckerService.checkResumeForJob(jobId, resumeId, userId));
     }
 
 }

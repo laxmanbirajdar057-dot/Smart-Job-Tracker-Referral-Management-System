@@ -43,6 +43,7 @@ public class Job {
 
     private String jobUrl;
 
+    @Column(columnDefinition = "TEXT")
     private String jobDescription;
 
     @Enumerated(EnumType.STRING)

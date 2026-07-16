@@ -46,13 +46,43 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("job_resumeFileName").textContent = file ? file.name : "No file chosen";
   });
 
+  // Sidebar + tab-bar navigation (previously had no click handlers wired at all)
+  document.querySelectorAll(".sidebar-item[data-tab]").forEach((item) => {
+    item.addEventListener("click", () => switchTab(item.dataset.tab));
+  });
+  document.querySelectorAll(".tab-btn[data-tab]").forEach((btn) => {
+    btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+  });
+
+  document.getElementById("insightCloseBtn").addEventListener("click", closeInsightModal);
+  document.getElementById("insightModalOverlay").addEventListener("click", (e) => {
+    if (e.target.id === "insightModalOverlay") closeInsightModal();
+  });
+
   loadDashboard();
 });
+
+// ===================== TAB NAVIGATION =====================
+
+function switchTab(tabName) {
+  document.querySelectorAll(".sidebar-item[data-tab]").forEach((item) => {
+    item.classList.toggle("active", item.dataset.tab === tabName);
+  });
+  document.querySelectorAll(".tab-btn[data-tab]").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.tab === tabName);
+  });
+  document.querySelectorAll(".tab-panel").forEach((panel) => panel.classList.remove("active"));
+  const panel = document.getElementById(`tab-${tabName}`);
+  if (panel) panel.classList.add("active");
+
+  if (tabName === "analytics") loadAnalytics();
+  if (tabName === "reminders") loadFollowUps();
+}
 
 // ===================== LOAD =====================
 
 async function loadDashboard() {
-  await Promise.all([loadStats(), loadJobs()]);
+  await Promise.all([loadStats(), loadJobs(), updateReminderBadge()]);
 }
 
 async function loadStats() {
@@ -180,6 +210,9 @@ const cvBadge = cvDisplay && job.resumeId
             ${cvBadge}
           </div>
           <div class="job-actions-row">
+            <button class="btn btn-secondary btn-sm" onclick="viewMatchScore(${job.id})" title="Resume vs JD keyword match">🎯 Match</button>
+            <button class="btn btn-secondary btn-sm" onclick="viewAtsCheck(${job.id})" title="ATS parseability check">✅ ATS</button>
+            <button class="btn btn-secondary btn-sm" onclick="viewAiFeedback(${job.id})" title="AI-generated resume feedback">✨ AI Feedback</button>
             <button class="btn btn-secondary btn-sm" onclick="openModal(${job.id})">Edit</button>
             <button class="btn btn-danger btn-sm" onclick="handleDeleteJob(${job.id})">Delete</button>
           </div>
@@ -188,49 +221,221 @@ const cvBadge = cvDisplay && job.resumeId
   }).join("");
 }
 
-function renderAnalytics() {
-  if (!allJobs || allJobs.length === 0) {
-    document.getElementById("ana-breakdown").innerHTML =
-      `<div style="color:var(--text-dim);font-size:13px;">No applications yet.</div>`;
-    return;
+// ===================== ANALYTICS (backend-driven) =====================
+
+async function loadAnalytics() {
+  try {
+    const data = await apiFetch("/api/jobs/analytics");
+    const statusCounts = data.countByStatus || {};
+
+    const applied = Object.entries(statusCounts)
+      .filter(([status]) => status !== "SAVED")
+      .reduce((sum, [, count]) => sum + count, 0);
+    const offers = (statusCounts.OFFER || 0) + (statusCounts.NEGOTIATING || 0);
+    const rejected = statusCounts.REJECTED || 0;
+
+    document.getElementById("ana-total").textContent = data.totalApplications;
+    document.getElementById("ana-applied").textContent = applied;
+    document.getElementById("ana-offer").textContent = offers;
+    document.getElementById("ana-rejected").textContent = rejected;
+    document.getElementById("ana-referral").textContent = data.referredCount;
+
+    document.getElementById("ana-referral-rate").innerHTML =
+      `${data.referralOfferRate}%` +
+      `<div style="font-size:12px;font-weight:400;color:var(--text-dim);margin-top:4px;">` +
+      `vs ${data.nonReferralOfferRate}% offer rate without a referral (${data.nonReferredCount} cold applications)` +
+      `</div>`;
+
+    const total = data.totalApplications || 0;
+    document.getElementById("ana-breakdown").innerHTML = Object.entries(statusCounts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([status, count]) => {
+        const pct = total === 0 ? 0 : Math.round((count / total) * 100);
+        return `
+          <div style="margin-bottom:10px;">
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;">
+              <span>${formatLabel(status)}</span>
+              <span>${count} (${pct}%)</span>
+            </div>
+            <div style="background:var(--border);border-radius:4px;height:6px;">
+              <div style="width:${pct}%;background:var(--accent);border-radius:4px;height:6px;transition:width 0.3s;"></div>
+            </div>
+          </div>`;
+      }).join("") || `<div style="color:var(--text-dim);font-size:13px;">No applications yet.</div>`;
+  } catch (err) {
+    showToast("Couldn't load analytics: " + err.message, "error");
   }
+}
 
-  const total    = allJobs.length;
-  const applied  = allJobs.filter(j => j.status !== "SAVED").length;
-  const offers   = allJobs.filter(j => j.status === "OFFER" || j.status === "NEGOTIATING").length;
-  const rejected = allJobs.filter(j => j.status === "REJECTED").length;
-  const referral = allJobs.filter(j => j.hasReferral).length;
+// ===================== FOLLOW-UP REMINDERS (backend-driven) =====================
 
-  document.getElementById("ana-total").textContent    = total;
-  document.getElementById("ana-applied").textContent  = applied;
-  document.getElementById("ana-offer").textContent    = offers;
-  document.getElementById("ana-rejected").textContent = rejected;
-  document.getElementById("ana-referral").textContent = referral;
+async function updateReminderBadge() {
+  try {
+    const response = await apiFetch("/api/jobs/follow-ups");
+    const count = (response.data || []).length;
+    const badge = document.getElementById("reminderBadge");
+    if (count > 0) {
+      badge.textContent = count;
+      badge.style.display = "inline-block";
+    } else {
+      badge.style.display = "none";
+    }
+  } catch (err) {
+    console.error("Failed to load follow-up count", err);
+  }
+}
 
-  const rate = total === 0 ? 0 : Math.round((referral / total) * 100);
-  document.getElementById("ana-referral-rate").textContent = `${rate}%`;
+async function loadFollowUps() {
+  const container = document.getElementById("followUpList");
+  container.innerHTML = `<div class="empty-state">Checking for stale applications...</div>`;
+  try {
+    const response = await apiFetch("/api/jobs/follow-ups");
+    const jobs = response.data || [];
 
-  // Status breakdown bars
-  const statusGroups = {};
-  allJobs.forEach(j => {
-    statusGroups[j.status] = (statusGroups[j.status] || 0) + 1;
-  });
+    if (jobs.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <h3>Nothing needs a follow-up 🎉</h3>
+          <p>Jobs show up here if they've been stale 7+ days, or their deadline is within 3 days.</p>
+        </div>`;
+      return;
+    }
 
-  document.getElementById("ana-breakdown").innerHTML = Object.entries(statusGroups)
-    .sort((a, b) => b[1] - a[1])
-    .map(([status, count]) => {
-      const pct = Math.round((count / total) * 100);
+    container.innerHTML = jobs.map((job) => {
+      const initial = (job.company || "?")[0].toUpperCase();
+      const reason = job.deadline
+        ? `⏰ Deadline ${job.deadline}`
+        : `No status update in a while`;
       return `
-        <div style="margin-bottom:10px;">
-          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;">
-            <span>${formatLabel(status)}</span>
-            <span>${count} (${pct}%)</span>
+        <div class="job-card" data-id="${job.id}">
+          <div class="job-top">
+            <div class="job-info">
+              <div class="company-logo">${escapeHtml(initial)}</div>
+              <div>
+                <div class="job-title">${escapeHtml(job.roleName)}</div>
+                <div class="job-company">${escapeHtml(job.company)}</div>
+              </div>
+            </div>
+            <span class="status-badge status-${job.status}">${formatLabel(job.status)}</span>
           </div>
-          <div style="background:var(--border);border-radius:4px;height:6px;">
-            <div style="width:${pct}%;background:var(--accent);border-radius:4px;height:6px;transition:width 0.3s;"></div>
+          <div class="job-tags">
+            <span class="job-tag">${reason}</span>
+          </div>
+          <div class="job-footer">
+            <div class="job-actions-row">
+              <button class="btn btn-primary btn-sm" onclick="openModal(${job.id})">Update status</button>
+            </div>
           </div>
         </div>`;
     }).join("");
+  } catch (err) {
+    container.innerHTML = `<div class="empty-state">Couldn't load reminders: ${escapeHtml(err.message)}</div>`;
+  }
+}
+
+// ===================== SMART INSIGHTS: MATCH SCORE / ATS / AI FEEDBACK =====================
+
+function openInsightModal(title) {
+  document.getElementById("insightModalTitle").textContent = title;
+  document.getElementById("insightModalBody").innerHTML = `<div class="empty-state">Loading...</div>`;
+  document.getElementById("insightModalOverlay").classList.add("visible");
+}
+
+function closeInsightModal() {
+  document.getElementById("insightModalOverlay").classList.remove("visible");
+}
+
+function renderSkillChips(skills, emptyText) {
+  if (!skills || skills.length === 0) {
+    return `<div style="font-size:12px;color:var(--text-dim);">${emptyText}</div>`;
+  }
+  return skills.map((s) => `<span class="job-tag">${escapeHtml(s)}</span>`).join(" ");
+}
+
+async function viewMatchScore(jobId) {
+  openInsightModal("🎯 Resume ↔ JD Match Score");
+  const body = document.getElementById("insightModalBody");
+  try {
+    const data = await apiFetch(`/api/jobs/${jobId}/match-score`);
+    body.innerHTML = `
+      <div style="font-size:32px;font-weight:700;color:var(--accent);margin-bottom:12px;">${data.score}%</div>
+      <div style="margin-bottom:12px;">
+        <div style="font-size:12px;color:var(--text-dim);margin-bottom:6px;">Matched skills</div>
+        ${renderSkillChips(data.matchedSkills, "No overlap found")}
+      </div>
+      <div>
+        <div style="font-size:12px;color:var(--text-dim);margin-bottom:6px;">Missing skills</div>
+        ${renderSkillChips(data.missingSkills, "Nothing missing 🎉")}
+      </div>`;
+  } catch (err) {
+    body.innerHTML = `<div class="empty-state">${escapeHtml(err.message)}</div>`;
+  }
+}
+
+async function viewAtsCheck(jobId) {
+  const job = allJobs.find((j) => j.id === jobId);
+  if (!job || !job.resumeId) {
+    openInsightModal("✅ ATS Check");
+    document.getElementById("insightModalBody").innerHTML =
+      `<div class="empty-state">Attach a resume to this job first.</div>`;
+    return;
+  }
+
+  openInsightModal("✅ ATS Check");
+  const body = document.getElementById("insightModalBody");
+  try {
+    const data = await apiFetch(`/api/resumes/${job.resumeId}/ats-check`);
+    body.innerHTML = `
+      <div style="font-size:32px;font-weight:700;color:var(--accent);margin-bottom:12px;">${data.score}/100</div>
+      <div style="margin-bottom:12px;">
+        <div style="font-size:12px;color:var(--text-dim);margin-bottom:6px;">✅ Passed (${data.passedChecks.length})</div>
+        ${data.passedChecks.map((c) => `<div style="font-size:13px;padding:3px 0;">${escapeHtml(c)}</div>`).join("")}
+      </div>
+      <div>
+        <div style="font-size:12px;color:var(--text-dim);margin-bottom:6px;">⚠️ Issues (${data.issues.length})</div>
+        ${data.issues.map((c) => `<div style="font-size:13px;padding:3px 0;color:var(--danger,#e05555);">${escapeHtml(c)}</div>`).join("") || "<div style=\"font-size:13px;\">None found 🎉</div>"}
+      </div>`;
+  } catch (err) {
+    body.innerHTML = `<div class="empty-state">${escapeHtml(err.message)}</div>`;
+  }
+}
+
+// =====================AI FEEDBACK =====================
+
+
+const aiFeedbackInFlight = new Set();
+
+async function viewAiFeedback(jobId) {
+  if (aiFeedbackInFlight.has(jobId)) {
+    showToast("Already fetching AI feedback for this job — hang tight.", "error");
+    return;
+  }
+  aiFeedbackInFlight.add(jobId);
+
+  openInsightModal("✨ AI Resume Feedback");
+  const body = document.getElementById("insightModalBody");
+  body.innerHTML = `<div class="empty-state">Asking the AI to review your fit for this role... this can take a few seconds.</div>`;
+  try {
+    const data = await apiFetch(`/api/jobs/${jobId}/ai-feedback`);
+    body.innerHTML = `
+      <div style="margin-bottom:14px;font-size:14px;line-height:1.5;">${escapeHtml(data.overallImpression)}</div>
+      <div style="margin-bottom:12px;">
+        <div style="font-size:12px;color:var(--text-dim);margin-bottom:6px;">💪 Strengths</div>
+        ${(data.strengths || []).map((s) => `<div style="font-size:13px;padding:3px 0;">• ${escapeHtml(s)}</div>`).join("") || "<div style=\"font-size:13px;\">—</div>"}
+      </div>
+      <div style="margin-bottom:12px;">
+        <div style="font-size:12px;color:var(--text-dim);margin-bottom:6px;">🕳️ Gaps</div>
+        ${(data.gaps || []).map((s) => `<div style="font-size:13px;padding:3px 0;">• ${escapeHtml(s)}</div>`).join("") || "<div style=\"font-size:13px;\">—</div>"}
+      </div>
+      <div>
+        <div style="font-size:12px;color:var(--text-dim);margin-bottom:6px;">📝 Suggestions</div>
+        ${(data.suggestions || []).map((s) => `<div style="font-size:13px;padding:3px 0;">• ${escapeHtml(s)}</div>`).join("") || "<div style=\"font-size:13px;\">—</div>"}
+      </div>`;
+  } catch (err) {
+    body.innerHTML = `<div class="empty-state">${escapeHtml(err.message)}</div>`;
+  } finally {
+    aiFeedbackInFlight.delete(jobId);
+  }
 }
 
 // ===================== MODAL =====================
@@ -452,4 +657,32 @@ function escapeHtml(str) {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
+}
+
+async function viewAtsCheck(jobId) {
+  const job = allJobs.find((j) => j.id === jobId);
+  if (!job || !job.resumeId) {
+    openInsightModal("✅ ATS Check");
+    document.getElementById("insightModalBody").innerHTML =
+      `<div class="empty-state">Attach a resume to this job first.</div>`;
+    return;
+  }
+
+  openInsightModal("✅ ATS Check (role + JD aware)");
+  const body = document.getElementById("insightModalBody");
+  try {
+    const data = await apiFetch(`/api/jobs/${jobId}/ats-check`);
+    body.innerHTML = `
+      <div style="font-size:32px;font-weight:700;color:var(--accent);margin-bottom:12px;">${data.score}/100</div>
+      <div style="margin-bottom:12px;">
+        <div style="font-size:12px;color:var(--text-dim);margin-bottom:6px;">✅ Passed (${data.passedChecks.length})</div>
+        ${data.passedChecks.map((c) => `<div style="font-size:13px;padding:3px 0;">${escapeHtml(c)}</div>`).join("")}
+      </div>
+      <div>
+        <div style="font-size:12px;color:var(--text-dim);margin-bottom:6px;">⚠️ Issues (${data.issues.length})</div>
+        ${data.issues.map((c) => `<div style="font-size:13px;padding:3px 0;color:var(--danger,#e05555);">${escapeHtml(c)}</div>`).join("") || "<div style=\"font-size:13px;\">None found 🎉</div>"}
+      </div>`;
+  } catch (err) {
+    body.innerHTML = `<div class="empty-state">${escapeHtml(err.message)}</div>`;
+  }
 }
